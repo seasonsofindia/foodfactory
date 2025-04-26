@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,20 +44,20 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="bg-white shadow-sm">
+      <header className="bg-gradient-to-r from-purple-600 to-indigo-600 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <NavigationMenu className="h-16">
             <NavigationMenuList className="flex justify-between items-center">
               <div className="flex items-center space-x-4">
                 <NavigationMenuItem>
-                  <NavigationMenuLink href="/" className="font-medium">
-                    Cloud Kitchen Portal
+                  <NavigationMenuLink href="/" className="text-white font-bold text-xl hover:text-purple-200">
+                    Food Factory
                   </NavigationMenuLink>
                 </NavigationMenuItem>
                 {user && isAdmin && (
                   <>
                     <NavigationMenuItem>
-                      <NavigationMenuLink href="/admin/kitchens" className="text-gray-600">
+                      <NavigationMenuLink href="/admin/kitchens" className="text-purple-100 hover:text-white">
                         Manage Kitchens
                       </NavigationMenuLink>
                     </NavigationMenuItem>
@@ -67,11 +66,14 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               </div>
               <div>
                 {user ? (
-                  <Button onClick={handleLogout} variant="outline">
+                  <Button onClick={handleLogout} variant="outline" className="text-white border-white hover:bg-purple-700">
                     Sign Out
                   </Button>
                 ) : (
-                  <Button onClick={() => navigate("/auth")}>
+                  <Button 
+                    onClick={() => navigate("/auth")} 
+                    className="bg-white text-purple-600 hover:bg-purple-100 hover:text-purple-700"
+                  >
                     Sign In
                   </Button>
                 )}

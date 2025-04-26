@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { toast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
 
 const Auth = () => {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
@@ -21,12 +21,29 @@ const Auth = () => {
 
     try {
       if (isSignUp) {
+        // For signup, we'll use the identifier as both email and username
         const { data, error } = await supabase.auth.signUp({
-          email,
+          email: identifier,
           password,
+          options: {
+            data: {
+              user_name: identifier.split('@')[0], // Use part before @ as username
+            }
+          }
         });
         
         if (error) throw error;
+
+        // Insert into profiles table
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([{ 
+            id: data.user?.id,
+            email: identifier,
+            user_name: identifier.split('@')[0]
+          }]);
+
+        if (profileError) throw profileError;
         
         toast({
           title: "Success!",
@@ -35,14 +52,33 @@ const Auth = () => {
         
         console.log("Sign up successful:", data);
       } else {
+        // For sign in, we'll try with email
         const { data, error } = await supabase.auth.signInWithPassword({
-          email,
+          email: identifier,
           password,
         });
         
-        if (error) throw error;
+        if (error) {
+          // If email login fails, try to find user by username
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('email')
+            .eq('user_name', identifier)
+            .single();
+
+          if (profileError) throw error; // Use original email error if profile lookup fails
+
+          if (profileData) {
+            // Try login with email from profile
+            const { error: secondAttemptError } = await supabase.auth.signInWithPassword({
+              email: profileData.email,
+              password,
+            });
+            if (secondAttemptError) throw secondAttemptError;
+          }
+        }
         
-        console.log("Sign in successful:", data);
+        console.log("Sign in successful");
         navigate("/");
       }
     } catch (error: any) {
@@ -58,19 +94,20 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6 text-center">
-          {isSignUp ? "Create Account" : "Sign In"}
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gradient-to-br from-purple-100 to-indigo-50">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md border border-purple-100">
+        <h1 className="text-3xl font-bold mb-6 text-center bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+          {isSignUp ? "Create Account" : "Welcome Back"}
         </h1>
         <form onSubmit={handleAuth} className="space-y-4">
           <div>
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="identifier">Email or Username</Label>
             <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              id="identifier"
+              type="text"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              className="border-purple-200 focus:border-purple-400 focus:ring-purple-400"
               required
             />
           </div>
@@ -81,10 +118,15 @@ const Auth = () => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="border-purple-200 focus:border-purple-400 focus:ring-purple-400"
               required
             />
           </div>
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button 
+            type="submit" 
+            className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white" 
+            disabled={isLoading}
+          >
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -99,7 +141,7 @@ const Auth = () => {
         </form>
         <button
           onClick={() => setIsSignUp(!isSignUp)}
-          className="mt-4 text-sm text-blue-600 hover:underline w-full text-center"
+          className="mt-4 text-sm text-purple-600 hover:text-purple-800 hover:underline w-full text-center"
         >
           {isSignUp
             ? "Already have an account? Sign in"
