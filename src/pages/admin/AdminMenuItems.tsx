@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import MenuItemForm from "@/components/admin/MenuItemForm";
 import { Tables } from "@/integrations/supabase/types";
 import OrderingLinksForm from "@/components/admin/OrderingLinksForm";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const AdminMenuItems = () => {
   const { id: kitchenId } = useParams<{ id: string }>();
@@ -96,7 +97,7 @@ const AdminMenuItems = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDeleteMenuItem = async (id: string) => {
     try {
       const { error } = await supabase.from("menu_items").delete().eq("id", id);
       
@@ -138,161 +139,164 @@ const AdminMenuItems = () => {
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-purple-800">
-            {kitchen ? kitchen.name : "Loading..."} Menu
+          <h1 className="text-3xl font-bold text-green-800">
+            {kitchen ? kitchen.name : "Loading..."} Menu Management
           </h1>
-          <p className="text-gray-600">Manage menu items and ordering links</p>
         </div>
         <div className="flex gap-2">
           <Button
             variant="outline"
-            onClick={() => navigate(`/admin/kitchens/${kitchenId}`)}
-            className="border-purple-300 text-purple-700"
+            onClick={() => navigate(`/admin/kitchens`)}
+            className="border-green-300 text-green-700"
           >
             Back
           </Button>
-          
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline" className="border-blue-300 text-blue-700">
-                Ordering Links
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle className="text-purple-800">Manage Ordering Links</DialogTitle>
-              </DialogHeader>
-              <OrderingLinksForm 
-                kitchenId={kitchenId || ""} 
-                existingLinks={orderingLinks}
-                onSuccess={handleOrderingLinkSuccess}
-              />
-            </DialogContent>
-          </Dialog>
-          
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button className="bg-purple-600 hover:bg-purple-700">
-                <Plus className="mr-2 h-4 w-4" /> Add Menu Item
-              </Button>
-            </SheetTrigger>
-            <SheetContent className="sm:max-w-md">
-              <SheetHeader>
-                <SheetTitle className="text-purple-800">Add New Menu Item</SheetTitle>
-              </SheetHeader>
-              <div className="py-4">
-                <MenuItemForm 
-                  kitchenId={kitchenId || ""} 
-                  onSuccess={handleMenuItemSuccess} 
-                />
-              </div>
-            </SheetContent>
-          </Sheet>
         </div>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
-        </div>
-      ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-gray-100">
-                <TableHead className="w-[100px]">Image</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead className="w-[200px]">Category</TableHead>
-                <TableHead className="w-[100px]">Price</TableHead>
-                <TableHead className="w-[100px]">Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {menuItems.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
-                    No menu items found. Add your first menu item!
-                  </TableCell>
-                </TableRow>
-              ) : (
-                menuItems.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>
-                      {item.image_url ? (
-                        <img 
-                          src={item.image_url} 
-                          alt={item.name} 
-                          className="h-10 w-10 rounded object-cover"
-                        />
-                      ) : (
-                        <div className="h-10 w-10 rounded bg-gray-200 flex items-center justify-center text-gray-500">
-                          No Image
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {item.name}
-                      {item.is_vegetarian && (
-                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                          Veg
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell>{item.category || "Uncategorized"}</TableCell>
-                    <TableCell>${parseFloat(item.price.toString()).toFixed(2)}</TableCell>
-                    <TableCell>
-                      {item.is_available ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          Available
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                          Unavailable
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right space-x-2">
-                      <Sheet>
-                        <SheetTrigger asChild>
+      <Tabs defaultValue="menu-items" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="menu-items">Menu Items</TabsTrigger>
+          <TabsTrigger value="ordering-links">Ordering Links</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="menu-items">
+          <div className="flex justify-end mb-4">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button className="bg-green-600 hover:bg-green-700">
+                  <Plus className="mr-2 h-4 w-4" /> Add Menu Item
+                </Button>
+              </SheetTrigger>
+              <SheetContent className="sm:max-w-md">
+                <SheetHeader>
+                  <SheetTitle className="text-green-800">Add New Menu Item</SheetTitle>
+                </SheetHeader>
+                <div className="py-4">
+                  <MenuItemForm 
+                    kitchenId={kitchenId || ""} 
+                    onSuccess={handleMenuItemSuccess} 
+                  />
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+            </div>
+          ) : (
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-gray-100">
+                    <TableHead className="w-[100px]">Image</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead className="w-[200px]">Category</TableHead>
+                    <TableHead className="w-[100px]">Price</TableHead>
+                    <TableHead className="w-[100px]">Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {menuItems.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="h-24 text-center">
+                        No menu items found. Add your first menu item!
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    menuItems.map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell>
+                          {item.image_url ? (
+                            <img 
+                              src={item.image_url} 
+                              alt={item.name} 
+                              className="h-10 w-10 rounded object-cover"
+                            />
+                          ) : (
+                            <div className="h-10 w-10 rounded bg-gray-200 flex items-center justify-center text-gray-500">
+                              No Image
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {item.name}
+                          {item.is_vegetarian && (
+                            <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                              Veg
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell>{item.category || "Uncategorized"}</TableCell>
+                        <TableCell>${parseFloat(item.price.toString()).toFixed(2)}</TableCell>
+                        <TableCell>
+                          {item.is_available ? (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              Available
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                              Unavailable
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right space-x-2">
+                          <Sheet>
+                            <SheetTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setSelectedMenuItem(item)}
+                                className="border-green-300 text-green-700 hover:text-green-800 hover:bg-green-50"
+                              >
+                                <Edit className="h-4 w-4 mr-1" /> Edit
+                              </Button>
+                            </SheetTrigger>
+                            <SheetContent className="sm:max-w-md">
+                              <SheetHeader>
+                                <SheetTitle className="text-green-800">Edit Menu Item</SheetTitle>
+                              </SheetHeader>
+                              <div className="py-4">
+                                <MenuItemForm 
+                                  kitchenId={kitchenId || ""} 
+                                  menuItem={item}
+                                  onSuccess={handleMenuItemSuccess} 
+                                />
+                              </div>
+                            </SheetContent>
+                          </Sheet>
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => setSelectedMenuItem(item)}
-                            className="border-purple-300 text-purple-700 hover:text-purple-800 hover:bg-purple-50"
+                            onClick={() => handleDeleteMenuItem(item.id)}
+                            className="border-red-300 text-red-600 hover:text-red-700 hover:bg-red-50"
                           >
-                            <Edit className="h-4 w-4 mr-1" /> Edit
+                            <Trash2 className="h-4 w-4 mr-1" /> Delete
                           </Button>
-                        </SheetTrigger>
-                        <SheetContent className="sm:max-w-md">
-                          <SheetHeader>
-                            <SheetTitle className="text-purple-800">Edit Menu Item</SheetTitle>
-                          </SheetHeader>
-                          <div className="py-4">
-                            <MenuItemForm 
-                              kitchenId={kitchenId || ""} 
-                              menuItem={item}
-                              onSuccess={handleMenuItemSuccess} 
-                            />
-                          </div>
-                        </SheetContent>
-                      </Sheet>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(item.id)}
-                        className="border-red-300 text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4 mr-1" /> Delete
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="ordering-links">
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold mb-4 text-green-800">Ordering Links</h2>
+            <OrderingLinksForm 
+              kitchenId={kitchenId || ""} 
+              existingLinks={orderingLinks}
+              onSuccess={handleOrderingLinkSuccess}
+            />
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

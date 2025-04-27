@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,20 +45,20 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="bg-gradient-to-r from-purple-600 to-indigo-600 shadow-md">
+      <header className="bg-gradient-to-r from-green-600 to-blue-600 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <NavigationMenu className="h-16">
-            <NavigationMenuList className="flex justify-between items-center">
+            <NavigationMenuList className="flex justify-between items-center w-full">
               <div className="flex items-center space-x-4">
                 <NavigationMenuItem>
-                  <NavigationMenuLink href="/" className="text-white font-bold text-xl hover:text-purple-200">
+                  <NavigationMenuLink href="/" className="text-white font-bold text-xl hover:text-green-200">
                     Food Factory
                   </NavigationMenuLink>
                 </NavigationMenuItem>
                 {user && isAdmin && (
                   <>
                     <NavigationMenuItem>
-                      <NavigationMenuLink href="/admin/kitchens" className="text-purple-100 hover:text-white">
+                      <NavigationMenuLink href="/admin/kitchens" className="text-white hover:text-green-200">
                         Manage Kitchens
                       </NavigationMenuLink>
                     </NavigationMenuItem>
@@ -66,15 +67,15 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               </div>
               <div>
                 {user ? (
-                  <Button onClick={handleLogout} variant="outline" className="text-white border-white hover:bg-purple-700">
+                  <Button onClick={handleLogout} variant="outline" className="text-white border-white hover:bg-green-700">
                     Sign Out
                   </Button>
                 ) : (
                   <Button 
                     onClick={() => navigate("/auth")} 
-                    className="bg-white text-purple-600 hover:bg-purple-100 hover:text-purple-700"
+                    className="bg-white text-green-600 hover:bg-green-100 hover:text-green-700"
                   >
-                    Sign In
+                    Admin
                   </Button>
                 )}
               </div>

@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Trash2, Edit } from "lucide-react";
+import { Plus, Trash2, Edit, Menu } from "lucide-react";
 import KitchenForm from "@/components/admin/KitchenForm";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tables } from "@/integrations/supabase/types";
@@ -73,16 +73,16 @@ const AdminKitchens = () => {
   return (
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-purple-800">Manage Kitchens</h1>
+        <h1 className="text-3xl font-bold text-green-800">Manage Kitchens</h1>
         <Sheet>
           <SheetTrigger asChild>
-            <Button className="bg-purple-600 hover:bg-purple-700">
+            <Button className="bg-green-600 hover:bg-green-700">
               <Plus className="mr-2 h-4 w-4" /> Add Kitchen
             </Button>
           </SheetTrigger>
           <SheetContent className="sm:max-w-md">
             <SheetHeader>
-              <SheetTitle className="text-purple-800">Add New Kitchen</SheetTitle>
+              <SheetTitle className="text-green-800">Add New Kitchen</SheetTitle>
             </SheetHeader>
             <div className="py-4">
               <KitchenForm onSuccess={handleKitchenCreated} />
@@ -93,7 +93,7 @@ const AdminKitchens = () => {
 
       {loading ? (
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -138,9 +138,17 @@ const AdminKitchens = () => {
                         variant="outline"
                         size="sm"
                         onClick={() => navigate(`/admin/kitchens/${kitchen.id}`)}
-                        className="border-purple-300 text-purple-700 hover:text-purple-800 hover:bg-purple-50"
+                        className="border-green-300 text-green-700 hover:text-green-800 hover:bg-green-50"
                       >
                         <Edit className="h-4 w-4 mr-1" /> Edit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/admin/kitchens/${kitchen.id}/menu`)}
+                        className="border-blue-300 text-blue-700 hover:text-blue-800 hover:bg-blue-50"
+                      >
+                        <Menu className="h-4 w-4 mr-1" /> Menu
                       </Button>
                       <Button
                         variant="outline"

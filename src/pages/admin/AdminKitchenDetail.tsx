@@ -55,7 +55,7 @@ const AdminKitchenDetail = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
       </div>
     );
   }
@@ -68,22 +68,22 @@ const AdminKitchenDetail = () => {
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-purple-800">{kitchen.name}</h1>
+          <h1 className="text-3xl font-bold text-green-800">{kitchen.name}</h1>
           <p className="text-gray-600">Edit kitchen details</p>
         </div>
         <div className="space-x-2">
           <Button
             variant="outline"
             onClick={() => navigate("/admin/kitchens")}
-            className="border-purple-300 text-purple-700"
+            className="border-green-300 text-green-700"
           >
             Back to List
           </Button>
           <Button
             onClick={() => navigate(`/admin/kitchens/${id}/menu`)}
-            className="bg-purple-600 hover:bg-purple-700"
+            className="bg-green-600 hover:bg-green-700"
           >
-            Manage Menu Items
+            Manage Menu
           </Button>
         </div>
       </div>
@@ -91,7 +91,7 @@ const AdminKitchenDetail = () => {
       <div className="grid md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-purple-800">Edit Kitchen</CardTitle>
+            <CardTitle className="text-green-800">Edit Kitchen</CardTitle>
           </CardHeader>
           <CardContent>
             <KitchenForm kitchen={kitchen} onSuccess={handleSuccess} />
@@ -100,7 +100,7 @@ const AdminKitchenDetail = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-purple-800">Kitchen Preview</CardTitle>
+            <CardTitle className="text-green-800">Kitchen Preview</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">

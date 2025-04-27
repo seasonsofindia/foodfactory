@@ -190,7 +190,7 @@ const OrderingLinksForm = ({ kitchenId, existingLinks, onSuccess }: OrderingLink
       </Button>
       
       <div className="flex justify-end gap-2 pt-4">
-        <Button type="submit" className="bg-purple-600 hover:bg-purple-700" disabled={loading}>
+        <Button type="submit" className="bg-green-600 hover:bg-green-700" disabled={loading}>
           {loading ? (
             <span className="flex items-center">
               <span className="animate-spin mr-2 h-4 w-4 border-t-2 border-b-2 border-white rounded-full"></span>

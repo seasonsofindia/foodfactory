@@ -123,7 +123,7 @@ const KitchenForm = ({ kitchen, onSuccess }: KitchenFormProps) => {
           )}
         />
         
-        <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700" disabled={loading}>
+        <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={loading}>
           {loading ? (
             <span className="flex items-center">
               <span className="animate-spin mr-2 h-4 w-4 border-t-2 border-b-2 border-white rounded-full"></span>
