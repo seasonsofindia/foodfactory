@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import AdminKitchens from "./pages/admin/AdminKitchens";
 import AdminKitchenDetail from "./pages/admin/AdminKitchenDetail";
 import AdminMenuItems from "./pages/admin/AdminMenuItems";
+import KitchenMenu from "./pages/KitchenMenu";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/kitchen/:id" element={<KitchenMenu />} />
             <Route path="/admin/kitchens" element={<AdminKitchens />} />
             <Route path="/admin/kitchens/:id" element={<AdminKitchenDetail />} />
             <Route path="/admin/kitchens/:id/menu" element={<AdminMenuItems />} />

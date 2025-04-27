@@ -1,9 +1,8 @@
 
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
-import { ExternalLink } from "lucide-react";
 
 type KitchenCardProps = {
   kitchen: Tables<'kitchens'> & {
@@ -13,6 +12,8 @@ type KitchenCardProps = {
 };
 
 const KitchenCard = ({ kitchen }: KitchenCardProps) => {
+  const navigate = useNavigate();
+
   return (
     <Card className="h-full flex flex-col">
       <CardHeader>
@@ -29,21 +30,13 @@ const KitchenCard = ({ kitchen }: KitchenCardProps) => {
       </CardHeader>
       <CardContent className="flex-1 flex flex-col">
         <p className="text-gray-600 mb-4">{kitchen.description}</p>
-        <div className="mt-auto space-y-2">
-          {kitchen.ordering_links.map((link) => (
-            <a
-              key={link.id}
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block"
-            >
-              <Button variant="outline" className="w-full justify-between">
-                {link.platform_name}
-                <ExternalLink className="h-4 w-4 ml-2" />
-              </Button>
-            </a>
-          ))}
+        <div className="mt-auto">
+          <Button 
+            onClick={() => navigate(`/kitchen/${kitchen.id}`)}
+            className="w-full bg-green-600 hover:bg-green-700"
+          >
+            View Menu
+          </Button>
         </div>
       </CardContent>
     </Card>
