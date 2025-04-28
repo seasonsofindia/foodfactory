@@ -130,7 +130,7 @@ export type Database = {
           password: string | null
           role: Database["public"]["Enums"]["user_role"] | null
           updated_at: string | null
-          user_name: string
+          user_name: string | null
         }
         Insert: {
           created_at?: string | null
@@ -140,7 +140,7 @@ export type Database = {
           password?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string | null
-          user_name?: string
+          user_name?: string | null
         }
         Update: {
           created_at?: string | null
@@ -150,7 +150,7 @@ export type Database = {
           password?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string | null
-          user_name?: string
+          user_name?: string | null
         }
         Relationships: []
       }

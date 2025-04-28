@@ -1,12 +1,12 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { login } from "@/utils/auth";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -19,13 +19,7 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      
-      if (error) throw error;
-      
+      await login(email, password);
       toast.success("Signed in successfully");
       navigate("/admin/kitchens");
     } catch (error: any) {
