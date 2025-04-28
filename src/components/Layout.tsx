@@ -65,20 +65,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   </>
                 )}
               </div>
-              <div>
-                {user ? (
-                  <Button onClick={handleLogout} variant="outline" className="text-white border-white hover:bg-green-700">
-                    Sign Out
-                  </Button>
-                ) : (
-                  <Button 
-                    onClick={() => navigate("/auth")} 
-                    className="bg-white text-green-600 hover:bg-green-100 hover:text-green-700"
-                  >
-                    Admin
-                  </Button>
-                )}
-              </div>
             </NavigationMenuList>
           </NavigationMenu>
         </div>
@@ -88,6 +74,23 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           {children}
         </div>
       </main>
+      <footer className="py-4 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto flex justify-end">
+          {!user ? (
+            <Button 
+              onClick={() => navigate("/auth")} 
+              variant="outline"
+              className="text-gray-600 hover:text-gray-800"
+            >
+              Admin
+            </Button>
+          ) : (
+            <Button onClick={handleLogout} variant="outline" className="text-gray-600 hover:text-gray-800">
+              Sign Out
+            </Button>
+          )}
+        </div>
+      </footer>
     </div>
   );
 };

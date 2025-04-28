@@ -48,7 +48,7 @@ const KitchenMenu = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
+    <div className="max-w-7xl mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">{kitchen.name}</h1>
         <Button 
@@ -62,10 +62,10 @@ const KitchenMenu = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {kitchen.menu_items.map((item) => (
-          <Card key={item.id} className="h-48">
-            <CardContent className="p-4">
+          <Card key={item.id} className="h-auto">
+            <CardContent className="p-3">
               {item.image_url && (
-                <div className="h-20 mb-2">
+                <div className="h-16 mb-2">
                   <img
                     src={item.image_url}
                     alt={item.name}
@@ -73,15 +73,15 @@ const KitchenMenu = () => {
                   />
                 </div>
               )}
-              <div className="flex justify-between items-start mb-1">
-                <h3 className="font-medium">{item.name}</h3>
-                <span className="text-green-600 font-medium">
+              <div className="flex justify-between items-start gap-2">
+                <h3 className="text-sm font-medium">{item.name}</h3>
+                <span className="text-green-600 font-medium text-sm whitespace-nowrap">
                   ${parseFloat(item.price.toString()).toFixed(2)}
                 </span>
               </div>
-              <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
+              <p className="text-xs text-gray-600 line-clamp-2 mt-1">{item.description}</p>
               {item.is_vegetarian && (
-                <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded">
+                <span className="inline-block mt-1 px-1.5 py-0.5 text-xs bg-green-100 text-green-800 rounded">
                   Vegetarian
                 </span>
               )}
