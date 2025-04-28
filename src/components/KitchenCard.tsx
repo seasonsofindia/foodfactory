@@ -1,8 +1,7 @@
 
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tables } from "@/integrations/supabase/types";
-import { Button } from "@/components/ui/button";
 
 type KitchenCardProps = {
   kitchen: Tables<'kitchens'> & {
@@ -15,28 +14,23 @@ const KitchenCard = ({ kitchen }: KitchenCardProps) => {
   const navigate = useNavigate();
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader>
+    <Card 
+      className="h-40 cursor-pointer hover:shadow-lg transition-shadow"
+      onClick={() => navigate(`/kitchen/${kitchen.id}`)}
+    >
+      <CardContent className="flex p-4 h-full">
         {kitchen.logo_url && (
-          <div className="relative h-48 mb-4">
+          <div className="w-24 h-24 flex-shrink-0 mr-4">
             <img
               src={kitchen.logo_url}
               alt={kitchen.name}
-              className="absolute inset-0 w-full h-full object-cover rounded-t-lg"
+              className="w-full h-full object-cover rounded"
             />
           </div>
         )}
-        <CardTitle className="text-xl">{kitchen.name}</CardTitle>
-      </CardHeader>
-      <CardContent className="flex-1 flex flex-col">
-        <p className="text-gray-600 mb-4">{kitchen.description}</p>
-        <div className="mt-auto">
-          <Button 
-            onClick={() => navigate(`/kitchen/${kitchen.id}`)}
-            className="w-full bg-green-600 hover:bg-green-700"
-          >
-            View Menu
-          </Button>
+        <div className="flex-1 overflow-hidden">
+          <h3 className="text-lg font-semibold mb-2">{kitchen.name}</h3>
+          <p className="text-sm text-gray-600 line-clamp-2">{kitchen.description}</p>
         </div>
       </CardContent>
     </Card>
