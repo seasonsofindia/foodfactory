@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 
 const KitchenMenu = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +21,7 @@ const KitchenMenu = () => {
     ordering_links: Tables<'ordering_links'>[];
   } | null>(null);
   const [showOrderingLinks, setShowOrderingLinks] = useState(false);
+  const [categories, setCategories] = useState<string[]>([]);
 
   useEffect(() => {
     fetchKitchenDetails();
@@ -40,7 +42,35 @@ const KitchenMenu = () => {
 
     if (!error && data) {
       setKitchen(data);
+      
+      // Extract unique categories
+      if (data.menu_items && data.menu_items.length > 0) {
+        const uniqueCategories = Array.from(
+          new Set(
+            data.menu_items
+              .map(item => item.category || "Uncategorized")
+              .filter(category => category)
+          )
+        );
+        setCategories(uniqueCategories);
+      }
     }
+  };
+
+  // Parse tags from comma-separated string
+  const parseTags = (tagsString: string | null): string[] => {
+    if (!tagsString) return [];
+    return tagsString.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+  };
+
+  // Get menu items by category
+  const getItemsByCategory = (categoryName: string) => {
+    if (!kitchen?.menu_items) return [];
+    
+    return kitchen.menu_items.filter(item => {
+      const itemCategory = item.category || "Uncategorized";
+      return itemCategory === categoryName;
+    });
   };
 
   if (!kitchen) {
@@ -60,35 +90,81 @@ const KitchenMenu = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {kitchen.menu_items.map((item) => (
-          <Card key={item.id} className="h-auto">
-            <CardContent className="p-3">
-              {item.image_url && (
-                <div className="h-16 mb-2">
-                  <img
-                    src={item.image_url}
-                    alt={item.name}
-                    className="w-full h-full object-cover rounded"
-                  />
+      {categories.length > 0 ? (
+        categories.map(category => (
+          <div key={category} className="mb-8">
+            <h2 className="text-xl font-semibold mb-3 text-green-700 border-b border-green-200 pb-2">
+              {category}
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {getItemsByCategory(category).map((item) => (
+                <Card key={item.id} className="h-auto">
+                  <CardContent className="p-3">
+                    {item.image_url && (
+                      <div className="h-16 mb-2">
+                        <img
+                          src={item.image_url}
+                          alt={item.name}
+                          className="w-full h-full object-cover rounded"
+                        />
+                      </div>
+                    )}
+                    <div className="flex justify-between items-start gap-2">
+                      <h3 className="text-sm font-medium">{item.name}</h3>
+                      <span className="text-green-600 font-medium text-sm whitespace-nowrap">
+                        ${parseFloat(item.price.toString()).toFixed(2)}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-600 line-clamp-2 mt-1">{item.description}</p>
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {item.is_vegetarian && (
+                        <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
+                          Vegetarian
+                        </Badge>
+                      )}
+                      {parseTags(item.tags as unknown as string).map((tag, index) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        ))
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {kitchen.menu_items.map((item) => (
+            <Card key={item.id} className="h-auto">
+              <CardContent className="p-3">
+                {item.image_url && (
+                  <div className="h-16 mb-2">
+                    <img
+                      src={item.image_url}
+                      alt={item.name}
+                      className="w-full h-full object-cover rounded"
+                    />
+                  </div>
+                )}
+                <div className="flex justify-between items-start gap-2">
+                  <h3 className="text-sm font-medium">{item.name}</h3>
+                  <span className="text-green-600 font-medium text-sm whitespace-nowrap">
+                    ${parseFloat(item.price.toString()).toFixed(2)}
+                  </span>
                 </div>
-              )}
-              <div className="flex justify-between items-start gap-2">
-                <h3 className="text-sm font-medium">{item.name}</h3>
-                <span className="text-green-600 font-medium text-sm whitespace-nowrap">
-                  ${parseFloat(item.price.toString()).toFixed(2)}
-                </span>
-              </div>
-              <p className="text-xs text-gray-600 line-clamp-2 mt-1">{item.description}</p>
-              {item.is_vegetarian && (
-                <span className="inline-block mt-1 px-1.5 py-0.5 text-xs bg-green-100 text-green-800 rounded">
-                  Vegetarian
-                </span>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                <p className="text-xs text-gray-600 line-clamp-2 mt-1">{item.description}</p>
+                {item.is_vegetarian && (
+                  <span className="inline-block mt-1 px-1.5 py-0.5 text-xs bg-green-100 text-green-800 rounded">
+                    Vegetarian
+                  </span>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <Dialog open={showOrderingLinks} onOpenChange={setShowOrderingLinks}>
         <DialogContent>

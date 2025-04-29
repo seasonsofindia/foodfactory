@@ -1,17 +1,17 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Trash2, Edit } from "lucide-react";
+import { Plus, Trash2, Edit, Tag } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import MenuItemForm from "@/components/admin/MenuItemForm";
 import { Tables } from "@/integrations/supabase/types";
 import OrderingLinksForm from "@/components/admin/OrderingLinksForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 
 const AdminMenuItems = () => {
   const { id: kitchenId } = useParams<{ id: string }>();
@@ -62,6 +62,7 @@ const AdminMenuItems = () => {
         .from("menu_items")
         .select("*")
         .eq("kitchen_id", kitchenId)
+        .order("category", { ascending: true })
         .order("name");
         
       if (error) throw error;
@@ -135,6 +136,32 @@ const AdminMenuItems = () => {
     });
   };
 
+  // Parse tags from comma-separated string
+  const parseTags = (tagsString: string | null): string[] => {
+    if (!tagsString) return [];
+    return tagsString.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+  };
+
+  // Group menu items by category
+  const getItemsByCategory = () => {
+    if (!menuItems || menuItems.length === 0) return {};
+    
+    const itemsByCategory: Record<string, Tables<'menu_items'>[]> = {};
+    
+    menuItems.forEach(item => {
+      const category = item.category || "Uncategorized";
+      if (!itemsByCategory[category]) {
+        itemsByCategory[category] = [];
+      }
+      itemsByCategory[category].push(item);
+    });
+    
+    return itemsByCategory;
+  };
+
+  const groupedItems = getItemsByCategory();
+  const categories = Object.keys(groupedItems).sort();
+
   return (
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
@@ -187,101 +214,132 @@ const AdminMenuItems = () => {
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
             </div>
           ) : (
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-gray-100">
-                    <TableHead className="w-[100px]">Image</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead className="w-[200px]">Category</TableHead>
-                    <TableHead className="w-[100px]">Price</TableHead>
-                    <TableHead className="w-[100px]">Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {menuItems.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="h-24 text-center">
-                        No menu items found. Add your first menu item!
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    menuItems.map((item) => (
-                      <TableRow key={item.id}>
-                        <TableCell>
-                          {item.image_url ? (
-                            <img 
-                              src={item.image_url} 
-                              alt={item.name} 
-                              className="h-10 w-10 rounded object-cover"
-                            />
-                          ) : (
-                            <div className="h-10 w-10 rounded bg-gray-200 flex items-center justify-center text-gray-500">
-                              No Image
-                            </div>
-                          )}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {item.name}
-                          {item.is_vegetarian && (
-                            <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                              Veg
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell>{item.category || "Uncategorized"}</TableCell>
-                        <TableCell>${parseFloat(item.price.toString()).toFixed(2)}</TableCell>
-                        <TableCell>
-                          {item.is_available ? (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              Available
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                              Unavailable
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right space-x-2">
-                          <Sheet>
-                            <SheetTrigger asChild>
+            <div className="space-y-8">
+              {categories.length > 0 ? (
+                categories.map(category => (
+                  <div key={category} className="bg-white rounded-lg shadow overflow-hidden">
+                    <div className="bg-gray-50 px-4 py-3 border-b">
+                      <h2 className="text-lg font-medium text-green-700">{category}</h2>
+                    </div>
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-gray-100">
+                          <TableHead className="w-[80px]">Image</TableHead>
+                          <TableHead>Name</TableHead>
+                          <TableHead className="w-[100px]">Price</TableHead>
+                          <TableHead className="hidden md:table-cell">Tags</TableHead>
+                          <TableHead className="w-[100px]">Status</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {groupedItems[category].map((item) => (
+                          <TableRow key={item.id}>
+                            <TableCell>
+                              {item.image_url ? (
+                                <img 
+                                  src={item.image_url} 
+                                  alt={item.name} 
+                                  className="h-10 w-10 rounded object-cover"
+                                />
+                              ) : (
+                                <div className="h-10 w-10 rounded bg-gray-200 flex items-center justify-center text-gray-500">
+                                  No Image
+                                </div>
+                              )}
+                            </TableCell>
+                            <TableCell className="font-medium">
+                              {item.name}
+                              {item.is_vegetarian && (
+                                <Badge variant="secondary" className="ml-2 bg-green-100 text-green-800 text-xs">
+                                  Veg
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell>${parseFloat(item.price.toString()).toFixed(2)}</TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              <div className="flex flex-wrap gap-1">
+                                {parseTags(item.tags as unknown as string).map((tag, idx) => (
+                                  <Badge key={idx} variant="outline" className="text-xs">
+                                    {tag}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {item.is_available ? (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                  Available
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                  Unavailable
+                                </span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right space-x-2">
+                              <Sheet>
+                                <SheetTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setSelectedMenuItem(item)}
+                                    className="border-green-300 text-green-700 hover:text-green-800 hover:bg-green-50"
+                                  >
+                                    <Edit className="h-4 w-4 mr-1" /> Edit
+                                  </Button>
+                                </SheetTrigger>
+                                <SheetContent className="sm:max-w-md">
+                                  <SheetHeader>
+                                    <SheetTitle className="text-green-800">Edit Menu Item</SheetTitle>
+                                  </SheetHeader>
+                                  <div className="py-4">
+                                    <MenuItemForm 
+                                      kitchenId={kitchenId || ""} 
+                                      menuItem={item}
+                                      onSuccess={handleMenuItemSuccess} 
+                                    />
+                                  </div>
+                                </SheetContent>
+                              </Sheet>
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setSelectedMenuItem(item)}
-                                className="border-green-300 text-green-700 hover:text-green-800 hover:bg-green-50"
+                                onClick={() => handleDeleteMenuItem(item.id)}
+                                className="border-red-300 text-red-600 hover:text-red-700 hover:bg-red-50"
                               >
-                                <Edit className="h-4 w-4 mr-1" /> Edit
+                                <Trash2 className="h-4 w-4 mr-1" /> Delete
                               </Button>
-                            </SheetTrigger>
-                            <SheetContent className="sm:max-w-md">
-                              <SheetHeader>
-                                <SheetTitle className="text-green-800">Edit Menu Item</SheetTitle>
-                              </SheetHeader>
-                              <div className="py-4">
-                                <MenuItemForm 
-                                  kitchenId={kitchenId || ""} 
-                                  menuItem={item}
-                                  onSuccess={handleMenuItemSuccess} 
-                                />
-                              </div>
-                            </SheetContent>
-                          </Sheet>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDeleteMenuItem(item.id)}
-                            className="border-red-300 text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4 mr-1" /> Delete
-                          </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                ))
+              ) : (
+                <div className="bg-white rounded-lg shadow overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-gray-100">
+                        <TableHead className="w-[100px]">Image</TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead className="w-[200px]">Category</TableHead>
+                        <TableHead className="w-[100px]">Price</TableHead>
+                        <TableHead className="w-[100px]">Status</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell colSpan={6} className="h-24 text-center">
+                          No menu items found. Add your first menu item!
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </div>
           )}
         </TabsContent>
