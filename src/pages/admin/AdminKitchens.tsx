@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Trash2, Edit, Menu } from "lucide-react";
+import { Plus, Trash2, Edit, Menu, ChefHat } from "lucide-react";
 import KitchenForm from "@/components/admin/KitchenForm";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tables } from "@/integrations/supabase/types";
@@ -74,21 +74,30 @@ const AdminKitchens = () => {
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-green-800">Manage Kitchens</h1>
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button className="bg-green-600 hover:bg-green-700">
-              <Plus className="mr-2 h-4 w-4" /> Add Kitchen
-            </Button>
-          </SheetTrigger>
-          <SheetContent className="sm:max-w-md">
-            <SheetHeader>
-              <SheetTitle className="text-green-800">Add New Kitchen</SheetTitle>
-            </SheetHeader>
-            <div className="py-4">
-              <KitchenForm onSuccess={handleKitchenCreated} />
-            </div>
-          </SheetContent>
-        </Sheet>
+        <div className="space-x-2 flex">
+          <Button
+            variant="outline"
+            onClick={() => navigate('/admin/create-little-curry-house')}
+            className="border-amber-300 bg-amber-50 text-amber-700 hover:text-amber-800 hover:bg-amber-100"
+          >
+            <ChefHat className="h-4 w-4 mr-2" /> Create Little Curry House
+          </Button>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button className="bg-green-600 hover:bg-green-700">
+                <Plus className="mr-2 h-4 w-4" /> Add Kitchen
+              </Button>
+            </SheetTrigger>
+            <SheetContent className="sm:max-w-md">
+              <SheetHeader>
+                <SheetTitle className="text-green-800">Add New Kitchen</SheetTitle>
+              </SheetHeader>
+              <div className="py-4">
+                <KitchenForm onSuccess={handleKitchenCreated} />
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
 
       {loading ? (
