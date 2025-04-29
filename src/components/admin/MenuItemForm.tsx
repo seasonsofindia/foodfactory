@@ -1,18 +1,20 @@
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+
+import { useState } from "react";
+import { useForm, FormProvider } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tables } from "@/integrations/supabase/types";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Tag, Plus } from "lucide-react";
+
+// Import the new component files
+import BasicFields from "./form/BasicFields";
+import CategorySelect from "./form/CategorySelect";
+import TagsInput from "./form/TagsInput";
+import PriceAndImageFields from "./form/PriceAndImageFields";
+import ToggleField from "./form/ToggleField";
 
 const menuItemSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
@@ -36,8 +38,6 @@ type MenuItemFormProps = {
 
 const MenuItemForm = ({ kitchenId, menuItem, onSuccess }: MenuItemFormProps) => {
   const [loading, setLoading] = useState(false);
-  const [existingCategories, setExistingCategories] = useState<string[]>([]);
-  const [showCustomCategory, setShowCustomCategory] = useState(false);
   const { toast } = useToast();
   
   const form = useForm<z.infer<typeof menuItemSchema>>({
@@ -54,33 +54,6 @@ const MenuItemForm = ({ kitchenId, menuItem, onSuccess }: MenuItemFormProps) => 
       tags: menuItem?.tags || "",
     },
   });
-
-  useEffect(() => {
-    fetchCategories();
-  }, [kitchenId]);
-
-  const fetchCategories = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("menu_items")
-        .select("category")
-        .eq("kitchen_id", kitchenId);
-
-      if (!error && data) {
-        const categories = data
-          .map(item => item.category)
-          .filter((category): category is string => 
-            category !== null && category !== undefined && category !== ""
-          );
-        
-        // Get unique categories
-        const uniqueCategories = Array.from(new Set(categories));
-        setExistingCategories(uniqueCategories);
-      }
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    }
-  };
 
   const onSubmit = async (data: z.infer<typeof menuItemSchema>) => {
     try {
@@ -132,213 +105,51 @@ const MenuItemForm = ({ kitchenId, menuItem, onSuccess }: MenuItemFormProps) => 
     }
   };
 
-  const handleCategoryChange = (value: string) => {
-    if (value === "custom") {
-      setShowCustomCategory(true);
-    } else {
-      setShowCustomCategory(false);
-    }
-    form.setValue("category", value);
-  };
-
-  
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Item Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Menu item name" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="Describe the menu item" 
-                  {...field} 
-                  value={field.value || ""}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <div className="grid grid-cols-1 gap-4">
-          <FormField
-            control={form.control}
-            name="category"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Category</FormLabel>
-                <Select
-                  onValueChange={handleCategoryChange}
-                  defaultValue={field.value || ""}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a category" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {existingCategories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                    <SelectItem value="custom">
-                      <span className="flex items-center">
-                        <Plus className="h-4 w-4 mr-1" /> Add New Category
-                      </span>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {showCustomCategory && (
-            <FormField
-              control={form.control}
-              name="customCategory"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>New Category Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter new category name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+    <FormProvider {...form}>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          {/* Basic Fields (Name & Description) */}
+          <BasicFields />
+          
+          {/* Category Selection */}
+          <CategorySelect kitchenId={kitchenId} />
+          
+          {/* Price & Image URL */}
+          <PriceAndImageFields />
+          
+          {/* Tags Input */}
+          <TagsInput />
+          
+          {/* Toggle Switches */}
+          <div className="grid grid-cols-2 gap-4">
+            <ToggleField 
+              name="is_vegetarian" 
+              label="Vegetarian" 
+              description="Is this a vegetarian item?"
             />
-          )}
-        </div>
-        
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="price"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Price ($)</FormLabel>
-                <FormControl>
-                  <Input placeholder="9.99" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            
+            <ToggleField 
+              name="is_available" 
+              label="Available" 
+              description="Is this item currently available?"
+            />
+          </div>
           
-          <FormField
-            control={form.control}
-            name="image_url"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Image URL</FormLabel>
-                <FormControl>
-                  <Input placeholder="https://example.com/image.jpg" {...field} value={field.value || ""} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+          {/* Submit Button */}
+          <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={loading}>
+            {loading ? (
+              <span className="flex items-center">
+                <span className="animate-spin mr-2 h-4 w-4 border-t-2 border-b-2 border-white rounded-full"></span>
+                Saving...
+              </span>
+            ) : (
+              <span>{menuItem ? "Update Menu Item" : "Create Menu Item"}</span>
             )}
-          />
-        </div>
-        
-        <FormField
-          control={form.control}
-          name="tags"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tags</FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <Tag className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
-                  <Input 
-                    placeholder="Spicy, Sweet, Vegan, Gluten-free (comma separated)" 
-                    className="pl-8" 
-                    {...field} 
-                    value={field.value || ""} 
-                  />
-                </div>
-              </FormControl>
-              <FormDescription className="text-xs">
-                Enter tags separated by commas (e.g., "Spicy, Healthy, Featured")
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="is_vegetarian"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                <div className="space-y-0.5">
-                  <FormLabel>Vegetarian</FormLabel>
-                  <FormDescription className="text-xs">
-                    Is this a vegetarian item?
-                  </FormDescription>
-                </div>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="is_available"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                <div className="space-y-0.5">
-                  <FormLabel>Available</FormLabel>
-                  <FormDescription className="text-xs">
-                    Is this item currently available?
-                  </FormDescription>
-                </div>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </div>
-        
-        <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={loading}>
-          {loading ? (
-            <span className="flex items-center">
-              <span className="animate-spin mr-2 h-4 w-4 border-t-2 border-b-2 border-white rounded-full"></span>
-              Saving...
-            </span>
-          ) : (
-            <span>{menuItem ? "Update Menu Item" : "Create Menu Item"}</span>
-          )}
-        </Button>
-      </form>
-    </Form>
+          </Button>
+        </form>
+      </Form>
+    </FormProvider>
   );
 };
 
