@@ -122,7 +122,7 @@ const KitchenMenu = () => {
                           Vegetarian
                         </Badge>
                       )}
-                      {parseTags(item.tags as unknown as string).map((tag, index) => (
+                      {parseTags(item.tags).map((tag, index) => (
                         <Badge key={index} variant="outline" className="text-xs">
                           {tag}
                         </Badge>
@@ -155,11 +155,18 @@ const KitchenMenu = () => {
                   </span>
                 </div>
                 <p className="text-xs text-gray-600 line-clamp-2 mt-1">{item.description}</p>
-                {item.is_vegetarian && (
-                  <span className="inline-block mt-1 px-1.5 py-0.5 text-xs bg-green-100 text-green-800 rounded">
-                    Vegetarian
-                  </span>
-                )}
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {item.is_vegetarian && (
+                    <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
+                      Vegetarian
+                    </Badge>
+                  )}
+                  {parseTags(item.tags).map((tag, index) => (
+                    <Badge key={index} variant="outline" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           ))}

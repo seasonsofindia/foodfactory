@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -52,7 +51,7 @@ const MenuItemForm = ({ kitchenId, menuItem, onSuccess }: MenuItemFormProps) => 
       image_url: menuItem?.image_url || "",
       is_vegetarian: menuItem?.is_vegetarian || false,
       is_available: menuItem?.is_available !== false, // defaults to true if undefined
-      tags: (menuItem?.tags as unknown as string) || "",
+      tags: menuItem?.tags || "",
     },
   });
 
@@ -142,6 +141,7 @@ const MenuItemForm = ({ kitchenId, menuItem, onSuccess }: MenuItemFormProps) => 
     form.setValue("category", value);
   };
 
+  
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

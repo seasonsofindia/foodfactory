@@ -48,6 +48,7 @@ export type Database = {
           kitchen_id: string
           name: string
           price: number
+          tags: string | null
           updated_at: string | null
         }
         Insert: {
@@ -61,6 +62,7 @@ export type Database = {
           kitchen_id: string
           name: string
           price: number
+          tags?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -74,6 +76,7 @@ export type Database = {
           kitchen_id?: string
           name?: string
           price?: number
+          tags?: string | null
           updated_at?: string | null
         }
         Relationships: [
