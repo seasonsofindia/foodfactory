@@ -33,8 +33,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 </NavigationMenuItem>
                 {user && isAdmin() && (
                   <NavigationMenuItem>
-                    <NavigationMenuLink href="/admin/kitchens" className="text-white hover:text-green-200">
-                      Manage Kitchens
+                    <NavigationMenuLink href="/" className="text-white hover:text-green-200">
+                      Back
                     </NavigationMenuLink>
                   </NavigationMenuItem>
                 )}
