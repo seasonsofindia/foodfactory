@@ -1,13 +1,20 @@
 
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList, NavigationMenuLink } from "@/components/ui/navigation-menu";
 import { getCurrentUser, logout, isAdmin, AuthUser } from "@/utils/auth";
+import { ArrowLeft } from "lucide-react";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Check if we're on a kitchen detail page by looking at the URL pattern
+  const isKitchenDetailPage = location.pathname.startsWith('/kitchen/');
+  // Check if we're on the main page
+  const isMainPage = location.pathname === '/';
 
   useEffect(() => {
     setUser(getCurrentUser());
@@ -31,11 +38,16 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                     Food Factory
                   </NavigationMenuLink>
                 </NavigationMenuItem>
-                {user && isAdmin() && (
+                {!isMainPage && (
                   <NavigationMenuItem>
-                    <NavigationMenuLink href="/" className="text-white hover:text-green-200">
+                    <Button 
+                      variant="ghost" 
+                      onClick={() => navigate(-1)} 
+                      className="text-white hover:text-green-200 flex items-center gap-1 p-0"
+                    >
+                      <ArrowLeft className="h-4 w-4" />
                       Back
-                    </NavigationMenuLink>
+                    </Button>
                   </NavigationMenuItem>
                 )}
               </div>

@@ -12,29 +12,43 @@ export type Database = {
       kitchens: {
         Row: {
           created_at: string | null
+          createdby_id: string | null
           description: string | null
           id: string
           logo_url: string | null
           name: string
+          phone_number: number | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
+          createdby_id?: string | null
           description?: string | null
           id?: string
           logo_url?: string | null
           name: string
+          phone_number?: number | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
+          createdby_id?: string | null
           description?: string | null
           id?: string
           logo_url?: string | null
           name?: string
+          phone_number?: number | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "kitchens_createdby_id_fkey"
+            columns: ["createdby_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       menu_items: {
         Row: {
