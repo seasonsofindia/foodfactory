@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -89,8 +90,7 @@ const KitchenMenu = () => {
         <div className="flex gap-2">
           {kitchen.phone_number && (
             <Button
-              as="a" 
-              href={formatPhoneForDialing(kitchen.phone_number)}
+              onClick={() => window.location.href = formatPhoneForDialing(kitchen.phone_number)}
               variant="outline"
               className="flex items-center gap-2"
             >

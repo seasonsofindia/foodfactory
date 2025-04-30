@@ -38,7 +38,7 @@ const KitchenForm = ({ kitchen, onSuccess }: KitchenFormProps) => {
       name: kitchen?.name || "",
       description: kitchen?.description || "",
       logo_url: kitchen?.logo_url || "",
-      phone_number: kitchen?.phone_number?.toString() || "",
+      phone_number: kitchen?.phone_number ? String(kitchen.phone_number) : "", // Convert number to string
       sort_order: kitchen?.sort_order?.toString() || "0",
     },
   });
