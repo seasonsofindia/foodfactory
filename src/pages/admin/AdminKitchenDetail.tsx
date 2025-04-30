@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import KitchenForm from "@/components/admin/KitchenForm";
 import { Tables } from "@/integrations/supabase/types";
+import { PhoneCall } from "lucide-react";
 
 const AdminKitchenDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -116,6 +117,19 @@ const AdminKitchenDetail = () => {
               <div>
                 <h3 className="font-medium text-gray-800">Description</h3>
                 <p className="text-gray-600">{kitchen.description || "No description provided"}</p>
+              </div>
+              {kitchen.phone_number && (
+                <div>
+                  <h3 className="font-medium text-gray-800">Phone</h3>
+                  <div className="flex items-center text-gray-600">
+                    <PhoneCall className="h-4 w-4 mr-1" /> 
+                    {kitchen.phone_number}
+                  </div>
+                </div>
+              )}
+              <div>
+                <h3 className="font-medium text-gray-800">Sort Order</h3>
+                <p className="text-gray-600">{kitchen.sort_order}</p>
               </div>
             </div>
           </CardContent>

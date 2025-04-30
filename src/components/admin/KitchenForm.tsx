@@ -15,6 +15,12 @@ const kitchenSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
   description: z.string().optional(),
   logo_url: z.string().url({ message: "Please enter a valid URL" }).optional().or(z.literal("")),
+  phone_number: z.string().optional().refine(value => {
+    if (!value) return true;
+    // Allow only digits, spaces, dashes, and parentheses
+    return /^[0-9\s\-\(\)]*$/.test(value);
+  }, { message: "Invalid phone number format" }),
+  sort_order: z.string().transform(val => parseInt(val) || 0),
 });
 
 type KitchenFormProps = {
@@ -32,6 +38,8 @@ const KitchenForm = ({ kitchen, onSuccess }: KitchenFormProps) => {
       name: kitchen?.name || "",
       description: kitchen?.description || "",
       logo_url: kitchen?.logo_url || "",
+      phone_number: kitchen?.phone_number?.toString() || "",
+      sort_order: kitchen?.sort_order?.toString() || "0",
     },
   });
 
@@ -43,6 +51,8 @@ const KitchenForm = ({ kitchen, onSuccess }: KitchenFormProps) => {
         name: data.name,
         description: data.description || null,
         logo_url: data.logo_url || null,
+        phone_number: data.phone_number ? Number(data.phone_number.replace(/[^\d]/g, '')) : null,
+        sort_order: data.sort_order,
       };
 
       if (kitchen) {
@@ -117,6 +127,34 @@ const KitchenForm = ({ kitchen, onSuccess }: KitchenFormProps) => {
               <FormLabel>Logo URL</FormLabel>
               <FormControl>
                 <Input placeholder="https://example.com/logo.png" {...field} value={field.value || ""} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="phone_number"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Phone Number</FormLabel>
+              <FormControl>
+                <Input placeholder="(407) 987-8937" {...field} value={field.value || ""} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="sort_order"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Sort Order</FormLabel>
+              <FormControl>
+                <Input type="number" placeholder="0" {...field} value={field.value || "0"} />
               </FormControl>
               <FormMessage />
             </FormItem>

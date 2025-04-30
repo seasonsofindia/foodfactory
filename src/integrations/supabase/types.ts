@@ -18,6 +18,7 @@ export type Database = {
           logo_url: string | null
           name: string
           phone_number: number | null
+          sort_order: number
           updated_at: string | null
         }
         Insert: {
@@ -28,6 +29,7 @@ export type Database = {
           logo_url?: string | null
           name: string
           phone_number?: number | null
+          sort_order?: number
           updated_at?: string | null
         }
         Update: {
@@ -38,6 +40,7 @@ export type Database = {
           logo_url?: string | null
           name?: string
           phone_number?: number | null
+          sort_order?: number
           updated_at?: string | null
         }
         Relationships: [
