@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -74,9 +73,10 @@ const KitchenMenu = () => {
   };
 
   // Format phone number for tel: link
-  const formatPhoneForDialing = (phoneNumber: number | null) => {
+  const formatPhoneForDialing = (phoneNumber: string | null) => {
     if (!phoneNumber) return '';
-    return `tel:${phoneNumber}`;
+    // Remove all non-digit characters for dialing
+    return `tel:${phoneNumber.replace(/\D/g, '')}`;
   };
 
   if (!kitchen) {

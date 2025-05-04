@@ -38,7 +38,7 @@ const KitchenForm = ({ kitchen, onSuccess }: KitchenFormProps) => {
       name: kitchen?.name || "",
       description: kitchen?.description || "",
       logo_url: kitchen?.logo_url || "",
-      phone_number: kitchen?.phone_number ? String(kitchen.phone_number) : "", // Convert number to string
+      phone_number: kitchen?.phone_number || "", // Phone number is now stored as text
       sort_order: kitchen?.sort_order?.toString() || "0",
     },
   });
@@ -51,7 +51,7 @@ const KitchenForm = ({ kitchen, onSuccess }: KitchenFormProps) => {
         name: data.name,
         description: data.description || null,
         logo_url: data.logo_url || null,
-        phone_number: data.phone_number ? Number(data.phone_number.replace(/[^\d]/g, '')) : null,
+        phone_number: data.phone_number || null, // Store as text, no need to convert
         sort_order: data.sort_order,
       };
 

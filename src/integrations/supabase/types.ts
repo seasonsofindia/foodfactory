@@ -17,7 +17,7 @@ export type Database = {
           id: string
           logo_url: string | null
           name: string
-          phone_number: number | null
+          phone_number: string | null
           sort_order: number
           updated_at: string | null
         }
@@ -28,7 +28,7 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name: string
-          phone_number?: number | null
+          phone_number?: string | null
           sort_order?: number
           updated_at?: string | null
         }
@@ -39,7 +39,7 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name?: string
-          phone_number?: number | null
+          phone_number?: string | null
           sort_order?: number
           updated_at?: string | null
         }
