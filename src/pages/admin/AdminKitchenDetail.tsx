@@ -9,9 +9,12 @@ import KitchenForm from "@/components/admin/KitchenForm";
 import { Tables } from "@/integrations/supabase/types";
 import { PhoneCall } from "lucide-react";
 
+// Extend the kitchen type to include header_image_url temporarily
+type ExtendedKitchen = Tables<'kitchens'> & { header_image_url?: string | null };
+
 const AdminKitchenDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const [kitchen, setKitchen] = useState<Tables<'kitchens'> | null>(null);
+  const [kitchen, setKitchen] = useState<ExtendedKitchen | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -32,7 +35,7 @@ const AdminKitchenDetail = () => {
         .single();
 
       if (error) throw error;
-      setKitchen(data);
+      setKitchen(data as ExtendedKitchen);
     } catch (error: any) {
       toast({
         title: "Error fetching kitchen",

@@ -11,6 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tables, TablesInsert } from "@/integrations/supabase/types";
 
+// Extend the kitchen type to include header_image_url temporarily
+type ExtendedKitchen = Tables<'kitchens'> & { header_image_url?: string | null };
+
 const kitchenSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
   description: z.string().optional(),
@@ -25,7 +28,7 @@ const kitchenSchema = z.object({
 });
 
 type KitchenFormProps = {
-  kitchen?: Tables<'kitchens'>;
+  kitchen?: ExtendedKitchen;
   onSuccess: () => void;
 };
 
@@ -49,7 +52,8 @@ const KitchenForm = ({ kitchen, onSuccess }: KitchenFormProps) => {
     try {
       setLoading(true);
       
-      const kitchenData: TablesInsert<'kitchens'> = {
+      // Add the header_image_url to the kitchen data
+      const kitchenData: TablesInsert<'kitchens'> & { header_image_url?: string | null } = {
         name: data.name,
         description: data.description || null,
         logo_url: data.logo_url || null,
