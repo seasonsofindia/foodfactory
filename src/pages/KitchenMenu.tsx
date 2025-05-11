@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const KitchenMenu = () => {
   const { id } = useParams<{ id: string }>();
@@ -24,6 +25,9 @@ const KitchenMenu = () => {
   const [showOrderingLinks, setShowOrderingLinks] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  
+  // Create refs for each category section
+  const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
     fetchKitchenDetails();
@@ -54,8 +58,19 @@ const KitchenMenu = () => {
               .filter(category => category)
           )
         );
-        setCategories(uniqueCategories);
-        setActiveCategory(uniqueCategories[0] || null);
+        // Sort categories based on the category_sort_order of the first item in each category
+        const sortedCategories = [...uniqueCategories].sort((a, b) => {
+          const aItems = data.menu_items.filter(item => (item.category || "Uncategorized") === a);
+          const bItems = data.menu_items.filter(item => (item.category || "Uncategorized") === b);
+          
+          const aOrder = aItems.length > 0 ? aItems[0].category_sort_order || 100 : 100;
+          const bOrder = bItems.length > 0 ? bItems[0].category_sort_order || 100 : 100;
+          
+          return aOrder - bOrder;
+        });
+        
+        setCategories(sortedCategories);
+        setActiveCategory(sortedCategories[0] || null);
       }
     }
   };
@@ -66,17 +81,30 @@ const KitchenMenu = () => {
     return tagsString.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
   };
 
-  // Get menu items by category
-  const getItemsByCategory = (categoryName: string | null) => {
-    if (!kitchen?.menu_items) return [];
+  // Get menu items organized by category
+  const getMenuItemsByCategory = () => {
+    if (!kitchen?.menu_items) return {};
     
-    // If no category is active, return all items
-    if (!categoryName) return kitchen.menu_items;
+    const itemsByCategory: Record<string, Tables<'menu_items'>[]> = {};
     
-    return kitchen.menu_items.filter(item => {
-      const itemCategory = item.category || "Uncategorized";
-      return itemCategory === categoryName;
+    // Group items by category
+    kitchen.menu_items.forEach(item => {
+      const category = item.category || "Uncategorized";
+      if (!itemsByCategory[category]) {
+        itemsByCategory[category] = [];
+      }
+      itemsByCategory[category].push(item);
     });
+    
+    // Sort items within each category
+    Object.keys(itemsByCategory).forEach(category => {
+      itemsByCategory[category].sort((a, b) => {
+        // First sort by name if we need a secondary sort criteria
+        return a.name.localeCompare(b.name);
+      });
+    });
+    
+    return itemsByCategory;
   };
 
   // Format phone number for tel: link
@@ -96,17 +124,25 @@ const KitchenMenu = () => {
       .substring(0, 2);
   };
 
-  // Handle category click
+  // Handle category click - scroll to the category section
   const handleCategoryClick = (category: string) => {
     setActiveCategory(category);
+    
+    // Scroll to the category section
+    if (categoryRefs.current[category]) {
+      categoryRefs.current[category]?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
   };
 
   if (!kitchen) {
     return <div className="text-center p-8">Loading...</div>;
   }
 
-  // Get items for the current category
-  const displayedItems = getItemsByCategory(activeCategory);
+  // Get items organized by category
+  const itemsByCategory = getMenuItemsByCategory();
 
   return (
     <div className="max-w-7xl mx-auto p-4">
@@ -168,49 +204,57 @@ const KitchenMenu = () => {
           </div>
         )}
 
-        {/* Menu items grid */}
+        {/* Menu items display - now showing all categories */}
         <div className="flex-1">
-          {activeCategory && (
-            <h2 className="text-xl font-semibold mb-3 text-green-700 border-b border-green-200 pb-2">
-              {activeCategory}
-            </h2>
-          )}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {displayedItems.map((item) => (
-              <Card key={item.id} className="h-auto">
-                <CardContent className="p-3">
-                  {item.image_url && (
-                    <div className="h-16 mb-2">
-                      <img
-                        src={item.image_url}
-                        alt={item.name}
-                        className="w-full h-full object-cover rounded"
-                      />
-                    </div>
-                  )}
-                  <div className="flex justify-between items-start gap-2">
-                    <h3 className="text-sm font-medium">{item.name}</h3>
-                    <span className="text-green-600 font-medium text-sm whitespace-nowrap">
-                      ${parseFloat(item.price.toString()).toFixed(2)}
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-600 line-clamp-2 mt-1">{item.description}</p>
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    {item.is_vegetarian && (
-                      <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
-                        Vegetarian
-                      </Badge>
-                    )}
-                    {parseTags(item.tags as unknown as string).map((tag, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+          <ScrollArea className="h-[calc(100vh-150px)]">
+            {categories.map(category => (
+              <div 
+                key={category}
+                ref={el => categoryRefs.current[category] = el}
+                className="mb-10"
+              >
+                <h2 className="text-xl font-semibold mb-3 text-green-700 border-b border-green-200 pb-2">
+                  {category}
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {itemsByCategory[category]?.map((item) => (
+                    <Card key={item.id} className="h-auto">
+                      <CardContent className="p-3">
+                        {item.image_url && (
+                          <div className="h-16 mb-2">
+                            <img
+                              src={item.image_url}
+                              alt={item.name}
+                              className="w-full h-full object-cover rounded"
+                            />
+                          </div>
+                        )}
+                        <div className="flex justify-between items-start gap-2">
+                          <h3 className="text-sm font-medium">{item.name}</h3>
+                          <span className="text-green-600 font-medium text-sm whitespace-nowrap">
+                            ${parseFloat(item.price.toString()).toFixed(2)}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-600 line-clamp-2 mt-1">{item.description}</p>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {item.is_vegetarian && (
+                            <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
+                              Vegetarian
+                            </Badge>
+                          )}
+                          {parseTags(item.tags as unknown as string).map((tag, index) => (
+                            <Badge key={index} variant="outline" className="text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
             ))}
-          </div>
+          </ScrollArea>
         </div>
       </div>
 

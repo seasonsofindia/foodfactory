@@ -59,6 +59,7 @@ export type Database = {
       menu_items: {
         Row: {
           category: string | null
+          category_sort_order: number | null
           created_at: string | null
           description: string | null
           id: string
@@ -73,6 +74,7 @@ export type Database = {
         }
         Insert: {
           category?: string | null
+          category_sort_order?: number | null
           created_at?: string | null
           description?: string | null
           id?: string
@@ -87,6 +89,7 @@ export type Database = {
         }
         Update: {
           category?: string | null
+          category_sort_order?: number | null
           created_at?: string | null
           description?: string | null
           id?: string

@@ -12,7 +12,7 @@ type CategorySelectProps = {
 };
 
 const CategorySelect = ({ kitchenId }: CategorySelectProps) => {
-  const [existingCategories, setExistingCategories] = useState<string[]>([]);
+  const [existingCategories, setExistingCategories] = useState<{name: string, sortOrder: number}[]>([]);
   const [showCustomCategory, setShowCustomCategory] = useState(false);
   const { control, setValue } = useFormContext();
 
@@ -24,19 +24,28 @@ const CategorySelect = ({ kitchenId }: CategorySelectProps) => {
     try {
       const { data, error } = await supabase
         .from("menu_items")
-        .select("category")
+        .select("category, category_sort_order")
         .eq("kitchen_id", kitchenId);
 
       if (!error && data) {
-        const categories = data
-          .map(item => item.category)
-          .filter((category): category is string => 
-            category !== null && category !== undefined && category !== ""
-          );
+        // Group by category and get the min sort order for each category
+        const categoriesMap = data.reduce<Record<string, number>>((acc, item) => {
+          if (!item.category) return acc;
+          
+          const sortOrder = item.category_sort_order || 100;
+          if (!acc[item.category] || sortOrder < acc[item.category]) {
+            acc[item.category] = sortOrder;
+          }
+          return acc;
+        }, {});
         
-        // Get unique categories
-        const uniqueCategories = Array.from(new Set(categories));
-        setExistingCategories(uniqueCategories);
+        // Convert to array of objects with name and sortOrder
+        const categories = Object.entries(categoriesMap)
+          .filter(([category]) => category !== null && category !== undefined && category !== "")
+          .map(([name, sortOrder]) => ({ name, sortOrder }))
+          .sort((a, b) => a.sortOrder - b.sortOrder);
+        
+        setExistingCategories(categories);
       }
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -50,6 +59,14 @@ const CategorySelect = ({ kitchenId }: CategorySelectProps) => {
       setShowCustomCategory(false);
     }
     setValue("category", value);
+    
+    // Set the category_sort_order based on the selected category
+    const selectedCategory = existingCategories.find(cat => cat.name === value);
+    if (selectedCategory) {
+      setValue("category_sort_order", selectedCategory.sortOrder);
+    } else {
+      setValue("category_sort_order", 100); // Default sort order
+    }
   };
 
   return (
@@ -71,8 +88,8 @@ const CategorySelect = ({ kitchenId }: CategorySelectProps) => {
               </FormControl>
               <SelectContent>
                 {existingCategories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
+                  <SelectItem key={category.name} value={category.name}>
+                    {category.name}
                   </SelectItem>
                 ))}
                 <SelectItem value="custom">
@@ -88,19 +105,41 @@ const CategorySelect = ({ kitchenId }: CategorySelectProps) => {
       />
 
       {showCustomCategory && (
-        <FormField
-          control={control}
-          name="customCategory"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>New Category Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter new category name" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="space-y-4">
+          <FormField
+            control={control}
+            name="customCategory"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>New Category Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter new category name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={control}
+            name="category_sort_order"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Category Sort Order</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    placeholder="Enter sort order (lower numbers show first)" 
+                    {...field} 
+                    onChange={(e) => field.onChange(parseInt(e.target.value) || 100)}
+                    value={field.value || 100}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
       )}
     </div>
   );
