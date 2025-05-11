@@ -20,7 +20,7 @@ const kitchenSchema = z.object({
     // Allow only digits, spaces, dashes, and parentheses
     return /^[0-9\s\-\(\)]*$/.test(value);
   }, { message: "Invalid phone number format" }),
-  sort_order: z.string().transform(val => parseInt(val) || 0),
+  sort_order: z.coerce.number(),
 });
 
 type KitchenFormProps = {
@@ -38,8 +38,8 @@ const KitchenForm = ({ kitchen, onSuccess }: KitchenFormProps) => {
       name: kitchen?.name || "",
       description: kitchen?.description || "",
       logo_url: kitchen?.logo_url || "",
-      phone_number: kitchen?.phone_number || "", // Phone number is now stored as text
-      sort_order: kitchen?.sort_order?.toString() || "0",
+      phone_number: kitchen?.phone_number || "",
+      sort_order: kitchen?.sort_order || 0,
     },
   });
 
@@ -51,7 +51,7 @@ const KitchenForm = ({ kitchen, onSuccess }: KitchenFormProps) => {
         name: data.name,
         description: data.description || null,
         logo_url: data.logo_url || null,
-        phone_number: data.phone_number || null, // Store as text, no need to convert
+        phone_number: data.phone_number || null,
         sort_order: data.sort_order,
       };
 
@@ -154,7 +154,12 @@ const KitchenForm = ({ kitchen, onSuccess }: KitchenFormProps) => {
             <FormItem>
               <FormLabel>Sort Order</FormLabel>
               <FormControl>
-                <Input type="number" placeholder="0" {...field} value={field.value || "0"} />
+                <Input 
+                  type="number" 
+                  placeholder="0" 
+                  {...field}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
