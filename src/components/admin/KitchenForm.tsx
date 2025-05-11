@@ -15,6 +15,7 @@ const kitchenSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
   description: z.string().optional(),
   logo_url: z.string().url({ message: "Please enter a valid URL" }).optional().or(z.literal("")),
+  header_image_url: z.string().url({ message: "Please enter a valid URL" }).optional().or(z.literal("")),
   phone_number: z.string().optional().refine(value => {
     if (!value) return true;
     // Allow only digits, spaces, dashes, and parentheses
@@ -38,6 +39,7 @@ const KitchenForm = ({ kitchen, onSuccess }: KitchenFormProps) => {
       name: kitchen?.name || "",
       description: kitchen?.description || "",
       logo_url: kitchen?.logo_url || "",
+      header_image_url: kitchen?.header_image_url || "",
       phone_number: kitchen?.phone_number || "",
       sort_order: kitchen?.sort_order || 0,
     },
@@ -51,6 +53,7 @@ const KitchenForm = ({ kitchen, onSuccess }: KitchenFormProps) => {
         name: data.name,
         description: data.description || null,
         logo_url: data.logo_url || null,
+        header_image_url: data.header_image_url || null,
         phone_number: data.phone_number || null,
         sort_order: data.sort_order,
       };
@@ -127,6 +130,20 @@ const KitchenForm = ({ kitchen, onSuccess }: KitchenFormProps) => {
               <FormLabel>Logo URL</FormLabel>
               <FormControl>
                 <Input placeholder="https://example.com/logo.png" {...field} value={field.value || ""} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="header_image_url"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Header Image URL</FormLabel>
+              <FormControl>
+                <Input placeholder="https://example.com/header.jpg" {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>

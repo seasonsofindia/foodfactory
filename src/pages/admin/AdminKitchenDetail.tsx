@@ -107,10 +107,21 @@ const AdminKitchenDetail = () => {
             <div className="space-y-4">
               {kitchen.logo_url && (
                 <div className="mb-4">
+                  <h3 className="font-medium text-gray-800">Logo</h3>
                   <img
                     src={kitchen.logo_url}
-                    alt={kitchen.name}
-                    className="max-h-40 rounded-md object-cover"
+                    alt={`${kitchen.name} Logo`}
+                    className="h-16 w-16 rounded-full object-cover mt-1"
+                  />
+                </div>
+              )}
+              {kitchen.header_image_url && (
+                <div className="mb-4">
+                  <h3 className="font-medium text-gray-800">Header Image</h3>
+                  <img
+                    src={kitchen.header_image_url}
+                    alt={`${kitchen.name} Header`}
+                    className="max-h-40 w-full rounded-md object-cover mt-1"
                   />
                 </div>
               )}
