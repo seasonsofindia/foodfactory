@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const KitchenMenu = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,6 +23,7 @@ const KitchenMenu = () => {
   } | null>(null);
   const [showOrderingLinks, setShowOrderingLinks] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   useEffect(() => {
     fetchKitchenDetails();
@@ -52,6 +55,7 @@ const KitchenMenu = () => {
           )
         );
         setCategories(uniqueCategories);
+        setActiveCategory(uniqueCategories[0] || null);
       }
     }
   };
@@ -63,8 +67,11 @@ const KitchenMenu = () => {
   };
 
   // Get menu items by category
-  const getItemsByCategory = (categoryName: string) => {
+  const getItemsByCategory = (categoryName: string | null) => {
     if (!kitchen?.menu_items) return [];
+    
+    // If no category is active, return all items
+    if (!categoryName) return kitchen.menu_items;
     
     return kitchen.menu_items.filter(item => {
       const itemCategory = item.category || "Uncategorized";
@@ -79,14 +86,43 @@ const KitchenMenu = () => {
     return `tel:${phoneNumber.replace(/\D/g, '')}`;
   };
 
+  // Get name initials for avatar fallback
+  const getNameInitials = (name: string): string => {
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
+  // Handle category click
+  const handleCategoryClick = (category: string) => {
+    setActiveCategory(category);
+  };
+
   if (!kitchen) {
     return <div className="text-center p-8">Loading...</div>;
   }
 
+  // Get items for the current category
+  const displayedItems = getItemsByCategory(activeCategory);
+
   return (
     <div className="max-w-7xl mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">{kitchen.name}</h1>
+        <div className="flex items-center gap-3">
+          <Avatar className="h-12 w-12 border border-gray-200">
+            {kitchen.logo_url ? (
+              <AvatarImage src={kitchen.logo_url} alt={kitchen.name} />
+            ) : (
+              <AvatarFallback className="bg-green-100 text-green-800">
+                {getNameInitials(kitchen.name)}
+              </AvatarFallback>
+            )}
+          </Avatar>
+          <h1 className="text-2xl font-bold">{kitchen.name}</h1>
+        </div>
         <div className="flex gap-2">
           {kitchen.phone_number && (
             <Button
@@ -107,88 +143,76 @@ const KitchenMenu = () => {
         </div>
       </div>
 
-      {categories.length > 0 ? (
-        categories.map(category => (
-          <div key={category} className="mb-8">
-            <h2 className="text-xl font-semibold mb-3 text-green-700 border-b border-green-200 pb-2">
-              {category}
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {getItemsByCategory(category).map((item) => (
-                <Card key={item.id} className="h-auto">
-                  <CardContent className="p-3">
-                    {item.image_url && (
-                      <div className="h-16 mb-2">
-                        <img
-                          src={item.image_url}
-                          alt={item.name}
-                          className="w-full h-full object-cover rounded"
-                        />
-                      </div>
-                    )}
-                    <div className="flex justify-between items-start gap-2">
-                      <h3 className="text-sm font-medium">{item.name}</h3>
-                      <span className="text-green-600 font-medium text-sm whitespace-nowrap">
-                        ${parseFloat(item.price.toString()).toFixed(2)}
-                      </span>
-                    </div>
-                    <p className="text-xs text-gray-600 line-clamp-2 mt-1">{item.description}</p>
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {item.is_vegetarian && (
-                        <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
-                          Vegetarian
-                        </Badge>
-                      )}
-                      {parseTags(item.tags).map((tag, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+      <div className="flex flex-col md:flex-row gap-6 mt-4">
+        {/* Categories sidebar */}
+        {categories.length > 0 && (
+          <div className="w-full md:w-64 flex-shrink-0">
+            <div className="bg-white rounded-lg shadow p-4 sticky top-4">
+              <h2 className="font-medium text-lg mb-3 text-green-700 border-b pb-2">Categories</h2>
+              <div className="space-y-1">
+                {categories.map(category => (
+                  <button
+                    key={category}
+                    onClick={() => handleCategoryClick(category)}
+                    className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
+                      activeCategory === category
+                        ? "bg-green-100 text-green-800 font-medium"
+                        : "hover:bg-gray-100"
+                    }`}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-        ))
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {kitchen.menu_items.map((item) => (
-            <Card key={item.id} className="h-auto">
-              <CardContent className="p-3">
-                {item.image_url && (
-                  <div className="h-16 mb-2">
-                    <img
-                      src={item.image_url}
-                      alt={item.name}
-                      className="w-full h-full object-cover rounded"
-                    />
-                  </div>
-                )}
-                <div className="flex justify-between items-start gap-2">
-                  <h3 className="text-sm font-medium">{item.name}</h3>
-                  <span className="text-green-600 font-medium text-sm whitespace-nowrap">
-                    ${parseFloat(item.price.toString()).toFixed(2)}
-                  </span>
-                </div>
-                <p className="text-xs text-gray-600 line-clamp-2 mt-1">{item.description}</p>
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {item.is_vegetarian && (
-                    <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
-                      Vegetarian
-                    </Badge>
+        )}
+
+        {/* Menu items grid */}
+        <div className="flex-1">
+          {activeCategory && (
+            <h2 className="text-xl font-semibold mb-3 text-green-700 border-b border-green-200 pb-2">
+              {activeCategory}
+            </h2>
+          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {displayedItems.map((item) => (
+              <Card key={item.id} className="h-auto">
+                <CardContent className="p-3">
+                  {item.image_url && (
+                    <div className="h-16 mb-2">
+                      <img
+                        src={item.image_url}
+                        alt={item.name}
+                        className="w-full h-full object-cover rounded"
+                      />
+                    </div>
                   )}
-                  {parseTags(item.tags).map((tag, index) => (
-                    <Badge key={index} variant="outline" className="text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  <div className="flex justify-between items-start gap-2">
+                    <h3 className="text-sm font-medium">{item.name}</h3>
+                    <span className="text-green-600 font-medium text-sm whitespace-nowrap">
+                      ${parseFloat(item.price.toString()).toFixed(2)}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-600 line-clamp-2 mt-1">{item.description}</p>
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {item.is_vegetarian && (
+                      <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
+                        Vegetarian
+                      </Badge>
+                    )}
+                    {parseTags(item.tags as unknown as string).map((tag, index) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
-      )}
+      </div>
 
       <Dialog open={showOrderingLinks} onOpenChange={setShowOrderingLinks}>
         <DialogContent>
