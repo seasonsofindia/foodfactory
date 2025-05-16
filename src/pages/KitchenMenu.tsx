@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, PhoneCall, MapPin } from "lucide-react";
+import { ExternalLink, PhoneCall } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -25,7 +25,6 @@ const KitchenMenu = () => {
   const [showOrderingLinks, setShowOrderingLinks] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
-  const [location, setLocation] = useState<Tables<'locations'> | null>(null);
   
   // Create refs for each category section
   const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -49,19 +48,6 @@ const KitchenMenu = () => {
 
     if (!error && data) {
       setKitchen(data);
-      
-      // Fetch location data
-      if (data.location_id) {
-        const { data: locationData, error: locationError } = await supabase
-          .from("locations")
-          .select("*")
-          .eq("id", data.location_id)
-          .single();
-        
-        if (!locationError && locationData) {
-          setLocation(locationData);
-        }
-      }
       
       // Extract unique categories
       if (data.menu_items && data.menu_items.length > 0) {
@@ -171,12 +157,7 @@ const KitchenMenu = () => {
               </AvatarFallback>
             )}
           </Avatar>
-          <div>
-            <h1 className="text-2xl font-bold">{kitchen.name}</h1>
-            {location && (
-              <p className="text-sm text-gray-500">{location.name}</p>
-            )}
-          </div>
+          <h1 className="text-2xl font-bold">{kitchen.name}</h1>
         </div>
         <div className="flex gap-2">
           {kitchen.phone_number && (
@@ -197,29 +178,6 @@ const KitchenMenu = () => {
           </Button>
         </div>
       </div>
-
-      {/* Location information */}
-      {location && (
-        <div className="mb-6 bg-green-50 p-4 rounded-lg">
-          <div className="flex items-center mb-2">
-            <PhoneCall className="h-4 w-4 text-green-600 mr-2" />
-            <a href={formatPhoneForDialing(location.phone_number || '')} className="text-green-700 font-medium">
-              {location.phone_number || "No phone number available"}
-            </a>
-          </div>
-          <div className="flex items-start">
-            <MapPin className="h-4 w-4 text-green-600 mr-2 mt-1" />
-            <a 
-              href={`https://maps.google.com/?q=${encodeURIComponent(location.address)}`}
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-green-700 font-medium"
-            >
-              {location.address}
-            </a>
-          </div>
-        </div>
-      )}
 
       <div className="flex flex-col md:flex-row gap-6 mt-4">
         {/* Categories sidebar */}

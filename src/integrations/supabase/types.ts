@@ -16,7 +16,6 @@ export type Database = {
           description: string | null
           header_image_url: string | null
           id: string
-          location_id: string
           logo_url: string | null
           name: string
           phone_number: string | null
@@ -29,7 +28,6 @@ export type Database = {
           description?: string | null
           header_image_url?: string | null
           id?: string
-          location_id: string
           logo_url?: string | null
           name: string
           phone_number?: string | null
@@ -42,7 +40,6 @@ export type Database = {
           description?: string | null
           header_image_url?: string | null
           id?: string
-          location_id?: string
           logo_url?: string | null
           name?: string
           phone_number?: string | null
@@ -57,44 +54,7 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "kitchens_location_id_fkey"
-            columns: ["location_id"]
-            isOneToOne: false
-            referencedRelation: "locations"
-            referencedColumns: ["id"]
-          },
         ]
-      }
-      locations: {
-        Row: {
-          address: string
-          created_at: string | null
-          id: string
-          is_default: boolean | null
-          name: string
-          phone_number: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          address: string
-          created_at?: string | null
-          id?: string
-          is_default?: boolean | null
-          name: string
-          phone_number?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          address?: string
-          created_at?: string | null
-          id?: string
-          is_default?: boolean | null
-          name?: string
-          phone_number?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
       }
       menu_items: {
         Row: {

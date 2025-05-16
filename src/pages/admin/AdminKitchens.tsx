@@ -9,47 +9,23 @@ import { Plus, Trash2, Edit, Menu } from "lucide-react";
 import KitchenForm from "@/components/admin/KitchenForm";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Tables } from "@/integrations/supabase/types";
-import LocationSelector from "@/components/LocationSelector";
 
 const AdminKitchens = () => {
   const [kitchens, setKitchens] = useState<Tables<'kitchens'>[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (selectedLocationId) {
-      fetchKitchens(selectedLocationId);
-    } else {
-      fetchDefaultLocation();
-    }
-  }, [selectedLocationId]);
+    fetchKitchens();
+  }, []);
 
-  const fetchDefaultLocation = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("locations")
-        .select("id")
-        .order("is_default", { ascending: false })
-        .limit(1)
-        .single();
-
-      if (!error && data) {
-        setSelectedLocationId(data.id);
-      }
-    } catch (error) {
-      console.error("Error fetching default location:", error);
-    }
-  };
-
-  const fetchKitchens = async (locationId: string) => {
+  const fetchKitchens = async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from("kitchens")
         .select("*")
-        .eq("location_id", locationId)
         .order("name");
 
       if (error) throw error;
@@ -76,9 +52,7 @@ const AdminKitchens = () => {
         description: "The kitchen has been successfully removed",
       });
       
-      if (selectedLocationId) {
-        fetchKitchens(selectedLocationId);
-      }
+      fetchKitchens();
     } catch (error: any) {
       toast({
         title: "Error deleting kitchen",
@@ -89,41 +63,32 @@ const AdminKitchens = () => {
   };
 
   const handleKitchenCreated = () => {
-    if (selectedLocationId) {
-      fetchKitchens(selectedLocationId);
-    }
+    fetchKitchens();
     toast({
       title: "Kitchen created",
       description: "New kitchen has been added successfully",
     });
   };
 
-  const handleLocationChange = (locationId: string) => {
-    setSelectedLocationId(locationId);
-  };
-
   return (
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-green-800">Manage Kitchens</h1>
-        <div className="flex gap-4 items-center">
-          <LocationSelector onLocationChange={handleLocationChange} />
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button className="bg-green-600 hover:bg-green-700">
-                <Plus className="mr-2 h-4 w-4" /> Add Kitchen
-              </Button>
-            </SheetTrigger>
-            <SheetContent className="sm:max-w-md">
-              <SheetHeader>
-                <SheetTitle className="text-green-800">Add New Kitchen</SheetTitle>
-              </SheetHeader>
-              <div className="py-4">
-                <KitchenForm onSuccess={handleKitchenCreated} />
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button className="bg-green-600 hover:bg-green-700">
+              <Plus className="mr-2 h-4 w-4" /> Add Kitchen
+            </Button>
+          </SheetTrigger>
+          <SheetContent className="sm:max-w-md">
+            <SheetHeader>
+              <SheetTitle className="text-green-800">Add New Kitchen</SheetTitle>
+            </SheetHeader>
+            <div className="py-4">
+              <KitchenForm onSuccess={handleKitchenCreated} />
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
 
       {loading ? (

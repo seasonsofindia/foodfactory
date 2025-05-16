@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -57,7 +57,6 @@ const menuItemSchema = z.object({
   category: z.string().optional().nullable(),
   category_sort_order: z.number().optional().nullable(),
   tags: z.string().optional().nullable(),
-  customCategory: z.string().optional(),
 });
 
 type MenuItemFormValues = z.infer<typeof menuItemSchema>;
@@ -85,7 +84,6 @@ const MenuItemForm = ({ kitchenId, menuItem, onSuccess }: MenuItemFormProps) => 
         category: menuItem.category || "",
         category_sort_order: menuItem.category_sort_order || 100,
         tags: menuItem.tags || "",
-        customCategory: "",
       }
       : {
         name: "",
@@ -97,29 +95,19 @@ const MenuItemForm = ({ kitchenId, menuItem, onSuccess }: MenuItemFormProps) => 
         category: "",
         category_sort_order: 100,
         tags: "",
-        customCategory: "",
       },
     mode: "onChange",
   });
 
   const onSubmit = async (values: MenuItemFormValues) => {
     try {
-      // Use the custom category if provided, otherwise use the selected category
-      const finalCategory = values.category === "custom" && values.customCategory 
-        ? values.customCategory 
-        : values.category;
+      const { category, category_sort_order, ...menuItemValues } = values;
 
       const upsertData = {
-        name: values.name,
-        description: values.description || null,
-        price: values.price,
-        image_url: values.image_url || null,
-        is_available: values.is_available,
-        is_vegetarian: values.is_vegetarian,
+        ...menuItemValues,
         kitchen_id: kitchenId,
-        category: finalCategory,
+        category: values.category === "custom" ? values.category : values.category,
         category_sort_order: values.category_sort_order || 100,
-        tags: values.tags || null,
       };
 
       if (menuItem) {
