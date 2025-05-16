@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, PhoneCall } from "lucide-react";
+import { ExternalLink, PhoneCall, MapPin } from "lucide-react";
 import {
   Dialog,
   DialogContent,
