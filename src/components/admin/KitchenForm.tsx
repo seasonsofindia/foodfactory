@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,6 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tables, TablesInsert } from "@/integrations/supabase/types";
 
 // Extend the kitchen type to include header_image_url temporarily
@@ -25,6 +26,7 @@ const kitchenSchema = z.object({
     return /^[0-9\s\-\(\)]*$/.test(value);
   }, { message: "Invalid phone number format" }),
   sort_order: z.coerce.number(),
+  location_id: z.string().uuid({ message: "Please select a location" }),
 });
 
 type KitchenFormProps = {
@@ -34,7 +36,23 @@ type KitchenFormProps = {
 
 const KitchenForm = ({ kitchen, onSuccess }: KitchenFormProps) => {
   const [loading, setLoading] = useState(false);
+  const [locations, setLocations] = useState<Tables<'locations'>[]>([]);
   const { toast } = useToast();
+  
+  useEffect(() => {
+    fetchLocations();
+  }, []);
+  
+  const fetchLocations = async () => {
+    const { data, error } = await supabase
+      .from("locations")
+      .select("*")
+      .order("name");
+      
+    if (!error && data) {
+      setLocations(data);
+    }
+  };
   
   const form = useForm<z.infer<typeof kitchenSchema>>({
     resolver: zodResolver(kitchenSchema),
@@ -45,6 +63,7 @@ const KitchenForm = ({ kitchen, onSuccess }: KitchenFormProps) => {
       header_image_url: kitchen?.header_image_url || "",
       phone_number: kitchen?.phone_number || "",
       sort_order: kitchen?.sort_order || 0,
+      location_id: kitchen?.location_id || "",
     },
   });
 
@@ -52,7 +71,7 @@ const KitchenForm = ({ kitchen, onSuccess }: KitchenFormProps) => {
     try {
       setLoading(true);
       
-      // Add the header_image_url to the kitchen data
+      // Add the header_image_url and location_id to the kitchen data
       const kitchenData: TablesInsert<'kitchens'> & { header_image_url?: string | null } = {
         name: data.name,
         description: data.description || null,
@@ -60,6 +79,7 @@ const KitchenForm = ({ kitchen, onSuccess }: KitchenFormProps) => {
         header_image_url: data.header_image_url || null,
         phone_number: data.phone_number || null,
         sort_order: data.sort_order,
+        location_id: data.location_id,
       };
 
       if (kitchen) {
@@ -102,6 +122,34 @@ const KitchenForm = ({ kitchen, onSuccess }: KitchenFormProps) => {
               <FormControl>
                 <Input placeholder="Kitchen name" {...field} />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="location_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Location</FormLabel>
+              <Select 
+                onValueChange={field.onChange} 
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a location" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {locations.map(location => (
+                    <SelectItem key={location.id} value={location.id}>
+                      {location.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
