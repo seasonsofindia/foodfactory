@@ -14,9 +14,10 @@ import { MapPin } from "lucide-react";
 type LocationSelectorProps = {
   onLocationChange?: (locationId: string) => void;
   className?: string;
+  defaultToPreferred?: boolean;
 };
 
-const LocationSelector = ({ onLocationChange, className }: LocationSelectorProps) => {
+const LocationSelector = ({ onLocationChange, className, defaultToPreferred = true }: LocationSelectorProps) => {
   const [locations, setLocations] = useState<Tables<'locations'>[]>([]);
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
   
@@ -28,13 +29,17 @@ const LocationSelector = ({ onLocationChange, className }: LocationSelectorProps
     const { data, error } = await supabase
       .from("locations")
       .select("*")
+      .order("is_default", { ascending: false })
       .order("name");
       
     if (!error && data) {
       setLocations(data);
       
       // Set default location
-      const defaultLocation = data.find(loc => loc.is_default) || data[0];
+      const defaultLocation = defaultToPreferred 
+        ? data.find(loc => loc.is_default) || data[0]
+        : data[0];
+        
       if (defaultLocation) {
         setSelectedLocationId(defaultLocation.id);
         if (onLocationChange) {
@@ -65,7 +70,7 @@ const LocationSelector = ({ onLocationChange, className }: LocationSelectorProps
         <SelectContent>
           {locations.map(location => (
             <SelectItem key={location.id} value={location.id}>
-              {location.name}
+              {location.name} {location.is_default ? "(Default)" : ""}
             </SelectItem>
           ))}
         </SelectContent>
