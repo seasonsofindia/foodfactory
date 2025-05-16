@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, PhoneCall } from "lucide-react";
+import { ExternalLink, PhoneCall, MapPin } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -25,12 +25,21 @@ const KitchenMenu = () => {
   const [showOrderingLinks, setShowOrderingLinks] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
   
   // Create refs for each category section
   const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
     fetchKitchenDetails();
+    
+    // Add window resize listener
+    const handleResize = () => {
+      setIsMobileView(window.innerWidth < 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, [id]);
 
   const fetchKitchenDetails = async () => {
@@ -179,13 +188,14 @@ const KitchenMenu = () => {
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-6 mt-4">
-        {/* Categories sidebar */}
+      {/* Main content area with flexible layout for responsive design */}
+      <div className={`flex ${isMobileView ? 'flex-row overflow-x-auto' : 'flex-col md:flex-row'} gap-4 mt-4`}>
+        {/* Categories sidebar - adjusts for mobile */}
         {categories.length > 0 && (
-          <div className="w-full md:w-64 flex-shrink-0">
-            <div className="bg-white rounded-lg shadow p-4 sticky top-4">
+          <div className={`${isMobileView ? 'w-auto flex-shrink-0 sticky left-0' : 'w-full md:w-64 flex-shrink-0'}`}>
+            <div className={`bg-white rounded-lg shadow p-4 ${isMobileView ? 'min-w-[160px]' : 'sticky top-4'}`}>
               <h2 className="font-medium text-lg mb-3 text-green-700 border-b pb-2">Categories</h2>
-              <div className="space-y-1">
+              <div className={`${isMobileView ? 'flex flex-col' : 'space-y-1'}`}>
                 {categories.map(category => (
                   <button
                     key={category}
@@ -204,9 +214,9 @@ const KitchenMenu = () => {
           </div>
         )}
 
-        {/* Menu items display - now showing all categories */}
-        <div className="flex-1">
-          <ScrollArea className="h-[calc(100vh-150px)]">
+        {/* Menu items display - takes full width */}
+        <div className="flex-1 w-full">
+          <ScrollArea className={`${isMobileView ? 'h-[calc(100vh-200px)]' : 'h-[calc(100vh-150px)]'}`}>
             {categories.map(category => (
               <div 
                 key={category}

@@ -56,6 +56,36 @@ export type Database = {
           },
         ]
       }
+      locations: {
+        Row: {
+          address: string
+          created_at: string | null
+          id: string
+          is_default: boolean | null
+          name: string
+          phone_number: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address: string
+          created_at?: string | null
+          id?: string
+          is_default?: boolean | null
+          name: string
+          phone_number?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string
+          created_at?: string | null
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          phone_number?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       menu_items: {
         Row: {
           category: string | null
