@@ -68,11 +68,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               variant="outline"
               className="text-gray-600 hover:text-gray-800"
             >
-              :)
+             🙎‍♂️
             </Button>
           ) : (
             <Button onClick={handleLogout} variant="outline" className="text-gray-600 hover:text-gray-800">
-              Sign Out
+              🙋‍♂️
             </Button>
           )}
         </div>
