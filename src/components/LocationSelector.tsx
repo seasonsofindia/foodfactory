@@ -107,7 +107,7 @@ const LocationSelector = ({ onLocationSelect }: LocationSelectorProps) => {
                   onClick={() => onLocationSelect(location)}
                   className="w-full bg-green-600 hover:bg-green-700"
                 >
-                  View Kitchens at {location.nick_name}
+                  View Kitchens➡️
                 </Button>
               </CardContent>
             </Card>
