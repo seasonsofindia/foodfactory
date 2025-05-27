@@ -25,11 +25,11 @@ const Index = () => {
     if (!locationNickname) return;
 
     try {
-      // First fetch the location details
+      // First fetch the location details by ID
       const { data: locationData, error: locationError } = await supabase
         .from("locations")
         .select("*")
-        .eq("nick_name", locationNickname)
+        .eq("id", locationNickname)
         .single();
 
       if (locationError || !locationData) {
@@ -40,7 +40,7 @@ const Index = () => {
 
       setLocation(locationData);
 
-      // Then fetch kitchens for this location
+      // Then fetch all kitchens (since location_ids column doesn't exist yet)
       const { data: kitchensData, error: kitchensError } = await supabase
         .from("kitchens")
         .select(`
@@ -51,13 +51,8 @@ const Index = () => {
         .order('sort_order', { ascending: true });
 
       if (!kitchensError && kitchensData) {
-        // Filter kitchens that include this location ID
-        const locationKitchens = kitchensData.filter(kitchen => {
-          if (!kitchen.location_ids) return false;
-          const locationIds = kitchen.location_ids.split(',').map(id => id.trim());
-          return locationIds.includes(locationData.id);
-        });
-        setKitchens(locationKitchens);
+        // For now, show all kitchens since location filtering isn't set up yet
+        setKitchens(kitchensData);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -80,7 +75,7 @@ const Index = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Our Kitchens @ {location.display_name}</h1>
+      <h1 className="text-2xl font-bold">Our Kitchens @ {location.name}</h1>
       <div className="flex items-center">
         <MapPin className="mr-2 h-5 w-5 text-green-600" />
         <a 

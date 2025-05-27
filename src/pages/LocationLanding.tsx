@@ -8,7 +8,8 @@ const LocationLanding = () => {
   const navigate = useNavigate();
 
   const handleLocationSelect = (location: Tables<'locations'>) => {
-    navigate(`/location/${location.nick_name}`);
+    // Use location id since nick_name doesn't exist in current schema
+    navigate(`/location/${location.id}`);
   };
 
   return <LocationSelector onLocationSelect={handleLocationSelect} />;

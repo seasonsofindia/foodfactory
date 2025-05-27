@@ -23,7 +23,7 @@ const LocationSelector = ({ onLocationSelect }: LocationSelectorProps) => {
       const { data, error } = await supabase
         .from("locations")
         .select("*")
-        .order("sort_order", { ascending: true });
+        .order("name", { ascending: true });
 
       if (!error && data) {
         setLocations(data);
@@ -55,7 +55,7 @@ const LocationSelector = ({ onLocationSelect }: LocationSelectorProps) => {
           {locations.map((location) => (
             <Card key={location.id} className="hover:shadow-lg transition-shadow cursor-pointer">
               <CardHeader>
-                <CardTitle className="text-green-700">{location.display_name}</CardTitle>
+                <CardTitle className="text-green-700">{location.name}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center text-gray-600">
@@ -72,7 +72,7 @@ const LocationSelector = ({ onLocationSelect }: LocationSelectorProps) => {
                   onClick={() => onLocationSelect(location)}
                   className="w-full bg-green-600 hover:bg-green-700"
                 >
-                  View Kitchens at {location.nick_name}
+                  View Kitchens at {location.name}
                 </Button>
               </CardContent>
             </Card>
