@@ -25,11 +25,11 @@ const Index = () => {
     if (!locationNickname) return;
 
     try {
-      // First fetch the location details by ID
+      // First fetch the location details by nick_name
       const { data: locationData, error: locationError } = await supabase
         .from("locations")
         .select("*")
-        .eq("id", locationNickname)
+        .eq("nick_name", locationNickname)
         .single();
 
       if (locationError || !locationData) {
@@ -75,7 +75,7 @@ const Index = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Our Kitchens @ {location.name}</h1>
+      <h1 className="text-2xl font-bold">Our Kitchens @ {location.display_name}</h1>
       <div className="flex items-center">
         <MapPin className="mr-2 h-5 w-5 text-green-600" />
         <a 
