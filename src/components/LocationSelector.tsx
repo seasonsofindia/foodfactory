@@ -15,6 +15,18 @@ const LocationSelector = ({ onLocationSelect }: LocationSelectorProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Default location when no data is available
+  const defaultLocation: Tables<'locations'> = {
+    id: 'default-orlando',
+    display_name: 'Orlando Kitchen Incubator',
+    nick_name: 'orlando',
+    address: '123 Innovation Way, Orlando, FL 32801',
+    phone_number: '(407) 555-0123',
+    sort_order: 1,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+
   useEffect(() => {
     fetchLocations();
   }, []);
@@ -32,16 +44,20 @@ const LocationSelector = ({ onLocationSelect }: LocationSelectorProps) => {
       if (error) {
         console.error("Error fetching locations:", error);
         setError(error.message);
-      } else if (data) {
+        // Set default location on error
+        setLocations([defaultLocation]);
+      } else if (data && data.length > 0) {
         console.log("Locations loaded:", data.length, "locations");
         setLocations(data);
       } else {
-        console.log("No locations data returned");
-        setLocations([]);
+        console.log("No locations data returned, using default location");
+        setLocations([defaultLocation]);
       }
     } catch (error) {
       console.error("Exception while fetching locations:", error);
       setError("Failed to fetch locations");
+      // Set default location on exception
+      setLocations([defaultLocation]);
     } finally {
       setLoading(false);
     }
@@ -55,25 +71,6 @@ const LocationSelector = ({ onLocationSelect }: LocationSelectorProps) => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Food Factory</h1>
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-            <p className="text-red-600">Error loading locations: {error}</p>
-            <Button 
-              onClick={fetchLocations} 
-              className="mt-4 bg-green-600 hover:bg-green-700"
-            >
-              Try Again
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-4xl mx-auto">
@@ -82,45 +79,40 @@ const LocationSelector = ({ onLocationSelect }: LocationSelectorProps) => {
           <p className="text-xl text-gray-600">Choose your location to explore our kitchens</p>
         </div>
         
-        {locations.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg mb-4">No locations available at the moment.</p>
-            <Button 
-              onClick={fetchLocations} 
-              className="bg-green-600 hover:bg-green-700"
-            >
-              Refresh
-            </Button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {locations.map((location) => (
-              <Card key={location.id} className="hover:shadow-lg transition-shadow cursor-pointer">
-                <CardHeader>
-                  <CardTitle className="text-green-700">{location.display_name}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center text-gray-600">
-                    <MapPin className="mr-2 h-4 w-4" />
-                    <span className="text-sm">{location.address}</span>
-                  </div>
-                  {location.phone_number && (
-                    <div className="flex items-center text-gray-600">
-                      <PhoneCall className="mr-2 h-4 w-4" />
-                      <span className="text-sm">{location.phone_number}</span>
-                    </div>
-                  )}
-                  <Button 
-                    onClick={() => onLocationSelect(location)}
-                    className="w-full bg-green-600 hover:bg-green-700"
-                  >
-                    View Kitchens at {location.nick_name}
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+        {error && (
+          <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+            <p className="text-yellow-600 mb-2">Unable to load locations from database: {error}</p>
+            <p className="text-sm text-yellow-500">Showing default location below</p>
           </div>
         )}
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {locations.map((location) => (
+            <Card key={location.id} className="hover:shadow-lg transition-shadow cursor-pointer">
+              <CardHeader>
+                <CardTitle className="text-green-700">{location.display_name}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center text-gray-600">
+                  <MapPin className="mr-2 h-4 w-4" />
+                  <span className="text-sm">{location.address}</span>
+                </div>
+                {location.phone_number && (
+                  <div className="flex items-center text-gray-600">
+                    <PhoneCall className="mr-2 h-4 w-4" />
+                    <span className="text-sm">{location.phone_number}</span>
+                  </div>
+                )}
+                <Button 
+                  onClick={() => onLocationSelect(location)}
+                  className="w-full bg-green-600 hover:bg-green-700"
+                >
+                  View Kitchens at {location.nick_name}
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   );
