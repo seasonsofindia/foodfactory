@@ -11,6 +11,7 @@ export type Database = {
     Tables: {
       kitchens: {
         Row: {
+          active_location: boolean | null
           created_at: string | null
           createdby_id: string | null
           description: string | null
@@ -24,6 +25,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          active_location?: boolean | null
           created_at?: string | null
           createdby_id?: string | null
           description?: string | null
@@ -37,6 +39,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          active_location?: boolean | null
           created_at?: string | null
           createdby_id?: string | null
           description?: string | null

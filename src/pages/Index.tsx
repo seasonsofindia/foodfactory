@@ -52,9 +52,10 @@ const Index = () => {
       }
 
       setLocation(locationData);
+      console.log("Location found:", locationData);
 
-      // Then fetch all kitchens that match this location
-      console.log("Fetching kitchens for location:", locationData.id);
+      // Then fetch all kitchens that match this location ID
+      console.log("Fetching kitchens for location ID:", locationData.id);
       const { data: kitchensData, error: kitchensError } = await supabase
         .from("kitchens")
         .select(`
@@ -71,7 +72,7 @@ const Index = () => {
         console.error("Kitchens error:", kitchensError);
         setError(`Error fetching kitchens: ${kitchensError.message}`);
       } else if (kitchensData) {
-        console.log("Kitchens loaded:", kitchensData.length, "kitchens");
+        console.log(`Successfully loaded ${kitchensData.length} kitchens for location:`, kitchensData);
         setKitchens(kitchensData);
       } else {
         console.log("No kitchens data returned");
@@ -137,6 +138,7 @@ const Index = () => {
         {kitchens.length === 0 ? (
           <div className="col-span-full text-center py-12">
             <p className="text-gray-500 text-lg">No kitchens available at this location yet.</p>
+            <p className="text-gray-400 text-sm mt-2">Location ID: {location.id}</p>
           </div>
         ) : (
           kitchens.map((kitchen) => (

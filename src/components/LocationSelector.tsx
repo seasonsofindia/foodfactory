@@ -15,9 +15,9 @@ const LocationSelector = ({ onLocationSelect }: LocationSelectorProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Default location when no data is available
+  // Default location with the specified ID
   const defaultLocation: Tables<'locations'> = {
-    id: 'default-orlando',
+    id: '331c7d5d-ec2b-4289-81f8-dccb74d39571',
     display_name: 'Orlando Kitchen Incubator',
     nick_name: 'orlando',
     address: '123 Innovation Way, Orlando, FL 32801',
@@ -33,30 +33,35 @@ const LocationSelector = ({ onLocationSelect }: LocationSelectorProps) => {
 
   const fetchLocations = async () => {
     try {
-      console.log("Fetching locations...");
+      console.log("Fetching locations from Supabase...");
+      
       const { data, error } = await supabase
         .from("locations")
         .select("*")
-        .order("display_name", { ascending: true });
+        .order("sort_order", { ascending: true });
 
-      console.log("Locations query result:", { data, error });
+      console.log("Locations query response:", { data, error });
 
       if (error) {
-        console.error("Error fetching locations:", error);
-        setError(error.message);
-        // Set default location on error
+        console.error("Supabase error fetching locations:", error);
+        setError(`Database error: ${error.message}`);
+        // Use default location on error
+        console.log("Using default location due to error");
         setLocations([defaultLocation]);
-      } else if (data && data.length > 0) {
-        console.log("Locations loaded:", data.length, "locations");
-        setLocations(data);
       } else {
-        console.log("No locations data returned, using default location");
-        setLocations([defaultLocation]);
+        if (data && data.length > 0) {
+          console.log(`Successfully loaded ${data.length} locations:`, data);
+          setLocations(data);
+        } else {
+          console.log("No locations found in database, using default location");
+          setLocations([defaultLocation]);
+        }
       }
-    } catch (error) {
-      console.error("Exception while fetching locations:", error);
-      setError("Failed to fetch locations");
-      // Set default location on exception
+    } catch (exception) {
+      console.error("Exception while fetching locations:", exception);
+      setError("Failed to connect to database");
+      // Use default location on exception
+      console.log("Using default location due to exception");
       setLocations([defaultLocation]);
     } finally {
       setLoading(false);
@@ -81,7 +86,7 @@ const LocationSelector = ({ onLocationSelect }: LocationSelectorProps) => {
         
         {error && (
           <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-            <p className="text-yellow-600 mb-2">Unable to load locations from database: {error}</p>
+            <p className="text-yellow-600 mb-2">Unable to load locations: {error}</p>
             <p className="text-sm text-yellow-500">Showing default location below</p>
           </div>
         )}
