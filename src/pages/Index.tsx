@@ -19,6 +19,9 @@ const Index = () => {
   useEffect(() => {
     if (locationNickname) {
       fetchLocationAndKitchens();
+    } else {
+      // If no location nickname, fetch default location
+      fetchDefaultLocationAndKitchens();
     }
   }, [locationNickname]);
 
@@ -33,6 +36,7 @@ const Index = () => {
         .from("locations")
         .select("*")
         .eq("nick_name", locationNickname)
+        .eq("active_location", true)
         .maybeSingle();
 
       console.log("Location query result:", { locationData, locationError });
@@ -45,12 +49,56 @@ const Index = () => {
       }
 
       if (!locationData) {
-        console.error("No location found with nick_name:", locationNickname);
-        setError(`Location "${locationNickname}" not found`);
+        console.error("No active location found with nick_name:", locationNickname);
+        setError(`Active location "${locationNickname}" not found`);
         setLoading(false);
         return;
       }
 
+      await fetchKitchensForLocation(locationData);
+    } catch (error) {
+      console.error("Exception in fetchLocationAndKitchens:", error);
+      setError("An unexpected error occurred");
+      setLoading(false);
+    }
+  };
+
+  const fetchDefaultLocationAndKitchens = async () => {
+    try {
+      console.log("Fetching default location by ID: 331c7d5d-ec2b-4289-81f8-dccb74d39571");
+      
+      const { data: locationData, error: locationError } = await supabase
+        .from("locations")
+        .select("*")
+        .eq("id", "331c7d5d-ec2b-4289-81f8-dccb74d39571")
+        .maybeSingle();
+
+      console.log("Default location query result:", { locationData, locationError });
+
+      if (locationError) {
+        console.error("Default location error:", locationError);
+        setError(`Error fetching default location: ${locationError.message}`);
+        setLoading(false);
+        return;
+      }
+
+      if (!locationData) {
+        console.error("No default location found");
+        setError("No default location available");
+        setLoading(false);
+        return;
+      }
+
+      await fetchKitchensForLocation(locationData);
+    } catch (error) {
+      console.error("Exception in fetchDefaultLocationAndKitchens:", error);
+      setError("An unexpected error occurred");
+      setLoading(false);
+    }
+  };
+
+  const fetchKitchensForLocation = async (locationData: Tables<'locations'>) => {
+    try {
       setLocation(locationData);
       console.log("Location found:", locationData);
 
@@ -80,8 +128,8 @@ const Index = () => {
         setKitchens([]);
       }
     } catch (error) {
-      console.error("Exception in fetchLocationAndKitchens:", error);
-      setError("An unexpected error occurred");
+      console.error("Exception in fetchKitchensForLocation:", error);
+      setError("An unexpected error occurred while fetching kitchens");
     } finally {
       setLoading(false);
     }

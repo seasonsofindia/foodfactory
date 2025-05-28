@@ -16,16 +16,17 @@ const LocationSelector = ({ onLocationSelect }: LocationSelectorProps) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchLocations();
+    fetchActiveLocations();
   }, []);
 
-  const fetchLocations = async () => {
+  const fetchActiveLocations = async () => {
     try {
-      console.log("Fetching locations from Supabase...");
+      console.log("Fetching active locations from Supabase...");
       
       const { data, error } = await supabase
         .from("locations")
         .select("*")
+        .eq("active_location", true)
         .order("sort_order", { ascending: true });
 
       console.log("Locations query response:", { data, error });
@@ -33,18 +34,50 @@ const LocationSelector = ({ onLocationSelect }: LocationSelectorProps) => {
       if (error) {
         console.error("Error fetching locations:", error);
         setError(`Database error: ${error.message}`);
-      } else if (data && data.length > 0) {
-        console.log(`Successfully loaded ${data.length} locations:`, data);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        console.log(`Successfully loaded ${data.length} active locations:`, data);
         setLocations(data);
       } else {
-        console.log("No locations found in database");
-        setError("No locations available");
+        console.log("No active locations found, trying to fetch default location...");
+        // If no active locations found, try to fetch the default location by ID
+        await fetchDefaultLocation();
       }
     } catch (exception) {
       console.error("Exception while fetching locations:", exception);
       setError("Failed to connect to database");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchDefaultLocation = async () => {
+    try {
+      console.log("Fetching default location by ID: 331c7d5d-ec2b-4289-81f8-dccb74d39571");
+      
+      const { data, error } = await supabase
+        .from("locations")
+        .select("*")
+        .eq("id", "331c7d5d-ec2b-4289-81f8-dccb74d39571")
+        .single();
+
+      if (error) {
+        console.error("Error fetching default location:", error);
+        setError("No locations available");
+        return;
+      }
+
+      if (data) {
+        console.log("Found default location:", data);
+        setLocations([data]);
+      } else {
+        setError("No locations available");
+      }
+    } catch (exception) {
+      console.error("Exception while fetching default location:", exception);
+      setError("Failed to connect to database");
     }
   };
 
@@ -66,7 +99,7 @@ const LocationSelector = ({ onLocationSelect }: LocationSelectorProps) => {
           </div>
           <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
             <p className="text-red-600 mb-2">Error: {error}</p>
-            <Button onClick={fetchLocations} className="bg-green-600 hover:bg-green-700">
+            <Button onClick={fetchActiveLocations} className="bg-green-600 hover:bg-green-700">
               Retry
             </Button>
           </div>

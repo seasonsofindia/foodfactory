@@ -71,6 +71,7 @@ export type Database = {
       }
       locations: {
         Row: {
+          active_location: boolean
           address: string
           created_at: string
           display_name: string
@@ -81,6 +82,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          active_location?: boolean
           address: string
           created_at?: string
           display_name: string
@@ -91,6 +93,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          active_location?: boolean
           address?: string
           created_at?: string
           display_name?: string
