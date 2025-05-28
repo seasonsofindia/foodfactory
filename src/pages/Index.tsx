@@ -14,7 +14,6 @@ const Index = () => {
     ordering_links: Tables<'ordering_links'>[];
   })[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (locationNickname) {
@@ -26,35 +25,22 @@ const Index = () => {
     if (!locationNickname) return;
 
     try {
-      console.log("Fetching location with nick_name:", locationNickname);
-      
-      // First fetch the location details by nick_name
+      // First fetch the location details
       const { data: locationData, error: locationError } = await supabase
         .from("locations")
         .select("*")
         .eq("nick_name", locationNickname)
-        .maybeSingle();
+        .single();
 
-      console.log("Location query result:", { locationData, locationError });
-
-      if (locationError) {
-        console.error("Location error:", locationError);
-        setError(`Error fetching location: ${locationError.message}`);
-        setLoading(false);
-        return;
-      }
-
-      if (!locationData) {
-        console.error("No location found with nick_name:", locationNickname);
-        setError(`Location "${locationNickname}" not found`);
+      if (locationError || !locationData) {
+        console.error("Location not found:", locationError);
         setLoading(false);
         return;
       }
 
       setLocation(locationData);
 
-      // Then fetch all kitchens that match this location
-      console.log("Fetching kitchens for location:", locationData.id);
+      // Then fetch kitchens for this location
       const { data: kitchensData, error: kitchensError } = await supabase
         .from("kitchens")
         .select(`
@@ -62,24 +48,19 @@ const Index = () => {
           menu_items (*),
           ordering_links (*)
         `)
-        .eq('locationids', locationData.id)
         .order('sort_order', { ascending: true });
 
-      console.log("Kitchens query result:", { kitchensData, kitchensError });
-
-      if (kitchensError) {
-        console.error("Kitchens error:", kitchensError);
-        setError(`Error fetching kitchens: ${kitchensError.message}`);
-      } else if (kitchensData) {
-        console.log("Kitchens loaded:", kitchensData.length, "kitchens");
-        setKitchens(kitchensData);
-      } else {
-        console.log("No kitchens data returned");
-        setKitchens([]);
+      if (!kitchensError && kitchensData) {
+        // Filter kitchens that include this location ID
+        const locationKitchens = kitchensData.filter(kitchen => {
+          if (!kitchen.location_ids) return false;
+          const locationIds = kitchen.location_ids.split(',').map(id => id.trim());
+          return locationIds.includes(locationData.id);
+        });
+        setKitchens(locationKitchens);
       }
     } catch (error) {
-      console.error("Exception in fetchLocationAndKitchens:", error);
-      setError("An unexpected error occurred");
+      console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
@@ -89,17 +70,6 @@ const Index = () => {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="space-y-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-red-800 mb-2">Error</h2>
-          <p className="text-red-600">{error}</p>
-        </div>
       </div>
     );
   }

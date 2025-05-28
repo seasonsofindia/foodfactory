@@ -8,7 +8,6 @@ const LocationLanding = () => {
   const navigate = useNavigate();
 
   const handleLocationSelect = (location: Tables<'locations'>) => {
-    // Use nick_name for the route as requested
     navigate(`/location/${location.nick_name}`);
   };
 

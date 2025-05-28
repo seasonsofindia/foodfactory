@@ -13,19 +13,6 @@ interface LocationSelectorProps {
 const LocationSelector = ({ onLocationSelect }: LocationSelectorProps) => {
   const [locations, setLocations] = useState<Tables<'locations'>[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Default location when no data is available
-  const defaultLocation: Tables<'locations'> = {
-    id: 'default-orlando',
-    display_name: 'Orlando Kitchen Incubator',
-    nick_name: 'orlando',
-    address: '123 Innovation Way, Orlando, FL 32801',
-    phone_number: '(407) 555-0123',
-    sort_order: 1,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  };
 
   useEffect(() => {
     fetchLocations();
@@ -33,31 +20,16 @@ const LocationSelector = ({ onLocationSelect }: LocationSelectorProps) => {
 
   const fetchLocations = async () => {
     try {
-      console.log("Fetching locations...");
       const { data, error } = await supabase
         .from("locations")
         .select("*")
-        .order("display_name", { ascending: true });
+        .order("sort_order", { ascending: true });
 
-      console.log("Locations query result:", { data, error });
-
-      if (error) {
-        console.error("Error fetching locations:", error);
-        setError(error.message);
-        // Set default location on error
-        setLocations([defaultLocation]);
-      } else if (data && data.length > 0) {
-        console.log("Locations loaded:", data.length, "locations");
+      if (!error && data) {
         setLocations(data);
-      } else {
-        console.log("No locations data returned, using default location");
-        setLocations([defaultLocation]);
       }
     } catch (error) {
-      console.error("Exception while fetching locations:", error);
-      setError("Failed to fetch locations");
-      // Set default location on exception
-      setLocations([defaultLocation]);
+      console.error("Error fetching locations:", error);
     } finally {
       setLoading(false);
     }
@@ -78,13 +50,6 @@ const LocationSelector = ({ onLocationSelect }: LocationSelectorProps) => {
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Food Factory</h1>
           <p className="text-xl text-gray-600">Choose your location to explore our kitchens</p>
         </div>
-        
-        {error && (
-          <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-            <p className="text-yellow-600 mb-2">Unable to load locations from database: {error}</p>
-            <p className="text-sm text-yellow-500">Showing default location below</p>
-          </div>
-        )}
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {locations.map((location) => (
@@ -107,7 +72,7 @@ const LocationSelector = ({ onLocationSelect }: LocationSelectorProps) => {
                   onClick={() => onLocationSelect(location)}
                   className="w-full bg-green-600 hover:bg-green-700"
                 >
-                  View Kitchens➡️
+                  View Kitchens at {location.nick_name}
                 </Button>
               </CardContent>
             </Card>
