@@ -16,6 +16,7 @@ export type Database = {
           description: string | null
           header_image_url: string | null
           id: string
+          locationids: string | null
           logo_url: string | null
           name: string
           phone_number: string | null
@@ -28,6 +29,7 @@ export type Database = {
           description?: string | null
           header_image_url?: string | null
           id?: string
+          locationids?: string | null
           logo_url?: string | null
           name: string
           phone_number?: string | null
@@ -40,6 +42,7 @@ export type Database = {
           description?: string | null
           header_image_url?: string | null
           id?: string
+          locationids?: string | null
           logo_url?: string | null
           name?: string
           phone_number?: string | null
@@ -54,35 +57,45 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "kitchens_locationids_fkey"
+            columns: ["locationids"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
         ]
       }
       locations: {
         Row: {
           address: string
-          created_at: string | null
+          created_at: string
+          display_name: string
           id: string
-          is_default: boolean | null
-          name: string
+          nick_name: string
           phone_number: string | null
-          updated_at: string | null
+          sort_order: number
+          updated_at: string
         }
         Insert: {
           address: string
-          created_at?: string | null
+          created_at?: string
+          display_name: string
           id?: string
-          is_default?: boolean | null
-          name: string
+          nick_name: string
           phone_number?: string | null
-          updated_at?: string | null
+          sort_order?: number
+          updated_at?: string
         }
         Update: {
           address?: string
-          created_at?: string | null
+          created_at?: string
+          display_name?: string
           id?: string
-          is_default?: boolean | null
-          name?: string
+          nick_name?: string
           phone_number?: string | null
-          updated_at?: string | null
+          sort_order?: number
+          updated_at?: string
         }
         Relationships: []
       }
