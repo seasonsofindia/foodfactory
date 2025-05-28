@@ -101,17 +101,13 @@ const MenuItemForm = ({ kitchenId, menuItem, onSuccess }: MenuItemFormProps) => 
 
   const onSubmit = async (values: MenuItemFormValues) => {
     try {
+      const { category, category_sort_order, ...menuItemValues } = values;
+
       const upsertData = {
-        name: values.name,
-        description: values.description,
-        price: values.price,
-        image_url: values.image_url,
-        is_available: values.is_available,
-        is_vegetarian: values.is_vegetarian,
+        ...menuItemValues,
         kitchen_id: kitchenId,
-        category: values.category,
+        category: values.category === "custom" ? values.category : values.category,
         category_sort_order: values.category_sort_order || 100,
-        tags: values.tags,
       };
 
       if (menuItem) {
@@ -134,7 +130,7 @@ const MenuItemForm = ({ kitchenId, menuItem, onSuccess }: MenuItemFormProps) => 
         // Create new menu item
         const { data, error } = await supabase
           .from("menu_items")
-          .insert(upsertData);
+          .insert([upsertData]);
 
         if (error) {
           console.error("Error creating menu item:", error);
