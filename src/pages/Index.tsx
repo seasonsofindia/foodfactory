@@ -23,7 +23,6 @@ const Index = () => {
         menu_items (*),
         ordering_links (*)
       `)
-      .where('active_kitchen',TRUE)
       .order('sort_order', { ascending: true });
 
     if (!error && data) {
