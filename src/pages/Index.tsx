@@ -28,7 +28,7 @@ const Index = () => {
     try {
       console.log("Fetching location with nick_name:", locationNickname);
       
-      // First fetch the location details by nick_name
+      // Fetch the location details by nick_name
       const { data: locationData, error: locationError } = await supabase
         .from("locations")
         .select("*")
@@ -54,8 +54,8 @@ const Index = () => {
       setLocation(locationData);
       console.log("Location found:", locationData);
 
-      // Then fetch all kitchens that match this location ID
-      console.log("Fetching kitchens for location ID:", locationData.id);
+      // Fetch active kitchens that match this location ID
+      console.log("Fetching active kitchens for location ID:", locationData.id);
       const { data: kitchensData, error: kitchensError } = await supabase
         .from("kitchens")
         .select(`
@@ -64,6 +64,7 @@ const Index = () => {
           ordering_links (*)
         `)
         .eq('locationids', locationData.id)
+        .eq('active_location', true)
         .order('sort_order', { ascending: true });
 
       console.log("Kitchens query result:", { kitchensData, kitchensError });
@@ -72,7 +73,7 @@ const Index = () => {
         console.error("Kitchens error:", kitchensError);
         setError(`Error fetching kitchens: ${kitchensError.message}`);
       } else if (kitchensData) {
-        console.log(`Successfully loaded ${kitchensData.length} kitchens for location:`, kitchensData);
+        console.log(`Successfully loaded ${kitchensData.length} active kitchens:`, kitchensData);
         setKitchens(kitchensData);
       } else {
         console.log("No kitchens data returned");
@@ -112,6 +113,7 @@ const Index = () => {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Our Kitchens @ {location.display_name}</h1>
+      
       <div className="flex items-center">
         <MapPin className="mr-2 h-5 w-5 text-green-600" />
         <a 
@@ -123,6 +125,7 @@ const Index = () => {
           {location.address}
         </a>
       </div>
+      
       {location.phone_number && (
         <div className="flex items-center">
           <PhoneCall className="mr-2 h-5 w-5 text-green-600" />
@@ -134,10 +137,11 @@ const Index = () => {
           </a>
         </div>
       )}
+      
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {kitchens.length === 0 ? (
           <div className="col-span-full text-center py-12">
-            <p className="text-gray-500 text-lg">No kitchens available at this location yet.</p>
+            <p className="text-gray-500 text-lg">No active kitchens available at this location yet.</p>
             <p className="text-gray-400 text-sm mt-2">Location ID: {location.id}</p>
           </div>
         ) : (

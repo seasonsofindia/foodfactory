@@ -15,18 +15,6 @@ const LocationSelector = ({ onLocationSelect }: LocationSelectorProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Default location with the specified ID
-  const defaultLocation: Tables<'locations'> = {
-    id: '331c7d5d-ec2b-4289-81f8-dccb74d39571',
-    display_name: 'Orlando Kitchen Incubator',
-    nick_name: 'orlando',
-    address: '123 Innovation Way, Orlando, FL 32801',
-    phone_number: '(407) 555-0123',
-    sort_order: 1,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  };
-
   useEffect(() => {
     fetchLocations();
   }, []);
@@ -43,26 +31,18 @@ const LocationSelector = ({ onLocationSelect }: LocationSelectorProps) => {
       console.log("Locations query response:", { data, error });
 
       if (error) {
-        console.error("Supabase error fetching locations:", error);
+        console.error("Error fetching locations:", error);
         setError(`Database error: ${error.message}`);
-        // Use default location on error
-        console.log("Using default location due to error");
-        setLocations([defaultLocation]);
+      } else if (data && data.length > 0) {
+        console.log(`Successfully loaded ${data.length} locations:`, data);
+        setLocations(data);
       } else {
-        if (data && data.length > 0) {
-          console.log(`Successfully loaded ${data.length} locations:`, data);
-          setLocations(data);
-        } else {
-          console.log("No locations found in database, using default location");
-          setLocations([defaultLocation]);
-        }
+        console.log("No locations found in database");
+        setError("No locations available");
       }
     } catch (exception) {
       console.error("Exception while fetching locations:", exception);
       setError("Failed to connect to database");
-      // Use default location on exception
-      console.log("Using default location due to exception");
-      setLocations([defaultLocation]);
     } finally {
       setLoading(false);
     }
@@ -76,6 +56,25 @@ const LocationSelector = ({ onLocationSelect }: LocationSelectorProps) => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">Food Factory</h1>
+            <p className="text-xl text-gray-600">Choose your location to explore our kitchens</p>
+          </div>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+            <p className="text-red-600 mb-2">Error: {error}</p>
+            <Button onClick={fetchLocations} className="bg-green-600 hover:bg-green-700">
+              Retry
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-4xl mx-auto">
@@ -83,13 +82,6 @@ const LocationSelector = ({ onLocationSelect }: LocationSelectorProps) => {
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Food Factory</h1>
           <p className="text-xl text-gray-600">Choose your location to explore our kitchens</p>
         </div>
-        
-        {error && (
-          <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
-            <p className="text-yellow-600 mb-2">Unable to load locations: {error}</p>
-            <p className="text-sm text-yellow-500">Showing default location below</p>
-          </div>
-        )}
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {locations.map((location) => (
