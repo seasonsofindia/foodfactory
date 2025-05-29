@@ -23,6 +23,7 @@ const Index = () => {
         menu_items (*),
         ordering_links (*)
       `)
+      .eq('active_kitchen', true) 
       .order('sort_order', { ascending: true });
 
     if (!error && data) {
