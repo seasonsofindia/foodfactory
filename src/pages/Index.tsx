@@ -75,6 +75,13 @@ const Index = () => {
           <KitchenCard key={kitchen.id} kitchen={kitchen} />
         ))}
       </div>
+      <div className="mt-10 p-6 rounded-lg bg-green-50 border border-green-200 flex items-center justify-center gap-6">
+    <img
+        src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExNTNxeDg0Y3h3NGRtb2gxZHkybWlyYmE5a3cyc2J4ZmY3bG5jdzhmNiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/RGKIlvqNPUnrXn41cK/giphy.gif"
+        alt="New"
+        className="w-20 h-20 rounded-full border-2 border-green-300 shadow-lg"
+    />
+    <div>
          <h1 className="text-2xl font-bold">
        Try our Dine-in Location @ Seasons of India
    </h1>
