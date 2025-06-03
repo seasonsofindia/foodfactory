@@ -75,6 +75,28 @@ const Index = () => {
           <KitchenCard key={kitchen.id} kitchen={kitchen} />
         ))}
       </div>
+         <h1 className="text-2xl font-bold">
+       Try our Dine-in Location @ Seasons of India
+   </h1>
+   <div className="flex items-center">
+       <a
+           href="https://maps.google.com/?q=10501+S+Orange+Ave,+STE+104,+Orlando,+FL,+32824"
+           target="_blank"
+           rel="noopener noreferrer"
+           className="text-xl font-bold hover:text-green-600 transition-colors"
+       >
+           10501 S Orange Ave, STE 104, Orlando, FL, 32824
+       </a>
+   </div>
+   <div className="flex items-center">
+       <PhoneCall className="mr-2 h-5 w-5 text-green-600" />
+       <a
+           href="tel:+14079878937"
+           className="text-xl font-bold hover:text-green-600 transition-colors"
+       >
+           +1(407)987-8937
+       </a>
+      </div>
     </div>
   );
 };
