@@ -11,11 +11,13 @@ export type Database = {
     Tables: {
       kitchens: {
         Row: {
+          active_kitchen: boolean | null
           created_at: string | null
           createdby_id: string | null
           description: string | null
           header_image_url: string | null
           id: string
+          locationids: string | null
           logo_url: string | null
           name: string
           phone_number: string | null
@@ -23,11 +25,13 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          active_kitchen?: boolean | null
           created_at?: string | null
           createdby_id?: string | null
           description?: string | null
           header_image_url?: string | null
           id?: string
+          locationids?: string | null
           logo_url?: string | null
           name: string
           phone_number?: string | null
@@ -35,11 +39,13 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          active_kitchen?: boolean | null
           created_at?: string | null
           createdby_id?: string | null
           description?: string | null
           header_image_url?: string | null
           id?: string
+          locationids?: string | null
           logo_url?: string | null
           name?: string
           phone_number?: string | null
@@ -54,35 +60,48 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "kitchens_locationids_fkey"
+            columns: ["locationids"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
         ]
       }
       locations: {
         Row: {
+          active_location: boolean
           address: string
-          created_at: string | null
+          created_at: string
+          display_name: string
           id: string
-          is_default: boolean | null
-          name: string
+          nick_name: string
           phone_number: string | null
-          updated_at: string | null
+          sort_order: number
+          updated_at: string
         }
         Insert: {
+          active_location?: boolean
           address: string
-          created_at?: string | null
+          created_at?: string
+          display_name: string
           id?: string
-          is_default?: boolean | null
-          name: string
+          nick_name: string
           phone_number?: string | null
-          updated_at?: string | null
+          sort_order?: number
+          updated_at?: string
         }
         Update: {
+          active_location?: boolean
           address?: string
-          created_at?: string | null
+          created_at?: string
+          display_name?: string
           id?: string
-          is_default?: boolean | null
-          name?: string
+          nick_name?: string
           phone_number?: string | null
-          updated_at?: string | null
+          sort_order?: number
+          updated_at?: string
         }
         Relationships: []
       }
