@@ -87,21 +87,21 @@ const Index = () => {
    </h1>
    <div className="flex items-center">
        <a
-           href="https://maps.google.com/?q=10501+S+Orange+Ave,+STE+104,+Orlando,+FL,+32824"
+           href="https://maps.app.goo.gl/T8hViqsBawbjD1VX8"
            target="_blank"
            rel="noopener noreferrer"
            className="text-xl font-bold hover:text-green-600 transition-colors"
        >
-           10501 S Orange Ave, STE 104, Orlando, FL, 32824
+           7085 S Orange Blossom Trail, Orlando, FL, 32809
        </a>
    </div>
    <div className="flex items-center">
        <PhoneCall className="mr-2 h-5 w-5 text-green-600" />
        <a
-           href="tel:+14079878937"
+           href="tel:+6892424441"
            className="text-xl font-bold hover:text-green-600 transition-colors"
        >
-           +1(407)987-8937
+           +1(689)242-4441
        </a>
       </div>
     </div>
