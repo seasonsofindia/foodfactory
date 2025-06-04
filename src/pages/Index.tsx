@@ -84,7 +84,15 @@ const Index = () => {
         />
         <div>
           <h1 className="text-2xl font-bold">
-            Try our Dine-in Location @ Seasons of India
+          Try our Dine-in Location @{" "}
+          <a
+            href="https://www.seasonsofindia.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-green-700 underline hover:text-green-900 transition-colors"
+            >
+            Seasons of India
+            </a>
           </h1>
           <div className="flex items-center">
             <a
