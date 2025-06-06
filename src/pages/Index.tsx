@@ -76,45 +76,6 @@ const Index = () => {
           <KitchenCard key={kitchen.id} kitchen={kitchen} />
         ))}
       </div>
-      <div className="mt-10 p-6 rounded-lg bg-green-50 border border-green-200 flex items-center justify-center gap-6">
-        <img
-          src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExNTNxeDg0Y3h3NGRtb2gxZHkybWlyYmE5a3cyc2J4ZmY3bG5jdzhmNiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/RGKIlvqNPUnrXn41cK/giphy.gif"
-          alt="New"
-          className="w-20 h-20 rounded-full border-2 border-green-300 shadow-lg"
-        />
-        <div>
-          <h1 className="text-2xl font-bold">
-          Try our Dine-in Location @{" "}
-          <a
-            href="https://www.seasonsofindia.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-green-700 underline hover:text-green-900 transition-colors"
-            >
-            Seasons of India
-            </a>
-          </h1>
-          <div className="flex items-center">
-            <a
-              href="https://maps.app.goo.gl/T8hViqsBawbjD1VX8"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xl font-bold hover:text-green-600 transition-colors"
-            >
-              7085 S Orange Blossom Trail, Orlando, FL, 32809
-            </a>
-          </div>
-          <div className="flex items-center">
-            <PhoneCall className="mr-2 h-5 w-5 text-green-600" />
-            <a
-              href="tel:+6892424441"
-              className="text-xl font-bold hover:text-green-600 transition-colors"
-            >
-              +1(689)242-4441
-            </a>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

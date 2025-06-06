@@ -38,6 +38,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                     Food Factory
                   </NavigationMenuLink>
                 </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <NavigationMenuLink href="/locations" className="text-white font-medium hover:text-green-200">
+                    Locations
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
                 {!isMainPage && (
                   <NavigationMenuItem>
                     <Button 
