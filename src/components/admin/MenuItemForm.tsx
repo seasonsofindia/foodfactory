@@ -102,13 +102,17 @@ const MenuItemForm = ({ kitchenId, menuItem, onSuccess }: MenuItemFormProps) => 
 
   const onSubmit = async (values: MenuItemFormValues) => {
     try {
-      const { category, category_sort_order, ...menuItemValues } = values;
-
       const upsertData = {
-        ...menuItemValues,
         kitchen_id: kitchenId,
-        category: values.category === "custom" ? values.category : values.category,
+        name: values.name,
+        description: values.description || null,
+        price: values.price,
+        image_url: values.image_url || null,
+        is_available: values.is_available,
+        is_vegetarian: values.is_vegetarian,
+        category: values.category || null,
         category_sort_order: values.category_sort_order || 100,
+        tags: values.tags || null,
       };
 
       if (menuItem) {
@@ -128,7 +132,7 @@ const MenuItemForm = ({ kitchenId, menuItem, onSuccess }: MenuItemFormProps) => 
           return;
         }
       } else {
-        // Create new menu item - fix: pass single object instead of array
+        // Create new menu item
         const { data, error } = await supabase
           .from("menu_items")
           .insert(upsertData);

@@ -2,61 +2,53 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
-import { MapPin, PhoneCall } from "lucide-react";
+import LocationCard from "@/components/LocationCard";
 
 const Locations = () => {
   const [locations, setLocations] = useState<Tables<'locations'>[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchLocations();
   }, []);
 
   const fetchLocations = async () => {
-    const { data, error } = await supabase
-      .from("locations")
-      .select("*")
-      .eq('active_location', true)
-      .order('sort_order', { ascending: true });
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("locations")
+        .select("*")
+        .eq('active_location', true)
+        .order('sort_order', { ascending: true });
 
-    if (!error && data) {
-      setLocations(data);
+      if (!error && data) {
+        setLocations(data);
+      }
+    } catch (error) {
+      console.error("Error fetching locations:", error);
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (loading) {
+    return <div className="text-center p-8">Loading locations...</div>;
+  }
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Our Locations</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {locations.map((location) => (
-          <div key={location.id} className="p-6 rounded-lg bg-green-50 border border-green-200">
-            <h2 className="text-xl font-bold mb-4">{location.display_name}</h2>
-            <div className="space-y-3">
-              <div className="flex items-center">
-                <MapPin className="mr-2 h-5 w-5 text-green-600" />
-                <a 
-                  href={`https://maps.google.com/?q=${encodeURIComponent(location.address)}`}
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-lg font-medium hover:text-green-600 transition-colors"
-                >
-                  {location.address}
-                </a>
-              </div>
-              {location.phone_number && (
-                <div className="flex items-center">
-                  <PhoneCall className="mr-2 h-5 w-5 text-green-600" />
-                  <a 
-                    href={`tel:${location.phone_number}`}
-                    className="text-lg font-medium hover:text-green-600 transition-colors"
-                  >
-                    {location.phone_number}
-                  </a>
-                </div>
-              )}
-            </div>
+        {locations.length > 0 ? (
+          locations.map((location) => (
+            <LocationCard key={location.id} location={location} />
+          ))
+        ) : (
+          <div className="col-span-full text-center py-8 text-gray-500">
+            No active locations found.
           </div>
-        ))}
+        )}
       </div>
 
       <div className="mt-10 p-6 rounded-lg bg-green-50 border border-green-200 flex items-center justify-center gap-6">
@@ -88,7 +80,7 @@ const Locations = () => {
             </a>
           </div>
           <div className="flex items-center">
-            <PhoneCall className="mr-2 h-5 w-5 text-green-600" />
+            <span className="mr-2 h-5 w-5 text-green-600">📞</span>
             <a
               href="tel:+6892424441"
               className="text-xl font-bold hover:text-green-600 transition-colors"

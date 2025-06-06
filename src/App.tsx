@@ -13,6 +13,7 @@ import AdminKitchenDetail from "./pages/admin/AdminKitchenDetail";
 import AdminMenuItems from "./pages/admin/AdminMenuItems";
 import KitchenMenu from "./pages/KitchenMenu";
 import Locations from "./pages/Locations";
+import LocationKitchens from "./pages/LocationKitchens";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/locations" element={<Locations />} />
+            <Route path="/location/:id" element={<LocationKitchens />} />
             <Route path="/kitchen/:id" element={<KitchenMenu />} />
             <Route path="/admin/kitchens" element={<AdminKitchens />} />
             <Route path="/admin/kitchens/:id" element={<AdminKitchenDetail />} />
