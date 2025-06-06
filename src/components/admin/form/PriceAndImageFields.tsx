@@ -15,7 +15,17 @@ const PriceAndImageFields = () => {
           <FormItem>
             <FormLabel>Price ($)</FormLabel>
             <FormControl>
-              <Input placeholder="9.99" {...field} />
+              <Input 
+                type="number"
+                step="0.01"
+                placeholder="9.99" 
+                {...field}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  const parsedValue = parseFloat(value);
+                  field.onChange(isNaN(parsedValue) ? 0 : parsedValue);
+                }}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
