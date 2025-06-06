@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -127,10 +128,10 @@ const MenuItemForm = ({ kitchenId, menuItem, onSuccess }: MenuItemFormProps) => 
           return;
         }
       } else {
-        // Create new menu item
+        // Create new menu item - fix: pass single object instead of array
         const { data, error } = await supabase
           .from("menu_items")
-          .insert([upsertData]);
+          .insert(upsertData);
 
         if (error) {
           console.error("Error creating menu item:", error);
