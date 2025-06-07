@@ -25,8 +25,7 @@ const App = () => (
       <BrowserRouter>
         <Layout>
           <Routes>
-            <Route path="/" element={<Locations />} />
-            <Route path="/default-location" element={<Index />} />
+            <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/locations" element={<Locations />} />
             <Route path="/location/:id" element={<LocationKitchens />} />

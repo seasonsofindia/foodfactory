@@ -1,15 +1,9 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { isAdmin } from "@/utils/auth";
 
 const DatabaseDebug = () => {
   const [debugInfo, setDebugInfo] = useState<any>(null);
-
-  // Only show debug info if user is admin
-  if (!isAdmin()) {
-    return null;
-  }
 
   useEffect(() => {
     fetchDebugInfo();
@@ -69,7 +63,7 @@ const DatabaseDebug = () => {
 
   return (
     <div className="p-4 bg-gray-100 rounded text-sm">
-      <h3 className="font-bold mb-2">Database Debug Info (Admin Only - Check Console for Details)</h3>
+      <h3 className="font-bold mb-2">Database Debug Info (Check Console for Details)</h3>
       <div className="space-y-2">
         <div>Locations found: {debugInfo.allLocations?.length || 0}</div>
         <div>Kitchens found: {debugInfo.allKitchens?.length || 0}</div>
