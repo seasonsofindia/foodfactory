@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
@@ -7,6 +6,7 @@ import LocationCard from "@/components/LocationCard";
 const Locations = () => {
   const [locations, setLocations] = useState<Tables<'locations'>[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchLocations();
@@ -15,17 +15,42 @@ const Locations = () => {
   const fetchLocations = async () => {
     try {
       setLoading(true);
+      setError(null);
+      console.log("Fetching locations...");
+      
+      // First try to get all locations to debug
+      const { data: allData, error: allError } = await supabase
+        .from("locations")
+        .select("*")
+        .order('sort_order', { ascending: true });
+
+      console.log("All locations:", allData);
+      console.log("All locations error:", allError);
+
+      // Then get only active locations
       const { data, error } = await supabase
         .from("locations")
         .select("*")
         .eq('active_location', true)
         .order('sort_order', { ascending: true });
 
-      if (!error && data) {
+      console.log("Active locations:", data);
+      console.log("Active locations error:", error);
+
+      if (error) {
+        console.error("Database error:", error);
+        setError(error.message);
+        return;
+      }
+
+      if (data) {
         setLocations(data);
+      } else {
+        console.log("No data returned from query");
       }
     } catch (error) {
       console.error("Error fetching locations:", error);
+      setError(error instanceof Error ? error.message : "Unknown error occurred");
     } finally {
       setLoading(false);
     }
@@ -33,6 +58,20 @@ const Locations = () => {
 
   if (loading) {
     return <div className="text-center p-8">Loading locations...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="text-center p-8">
+        <div className="text-red-600 mb-4">Error loading locations: {error}</div>
+        <button 
+          onClick={fetchLocations}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Retry
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -46,11 +85,13 @@ const Locations = () => {
           ))
         ) : (
           <div className="col-span-full text-center py-8 text-gray-500">
-            No active locations found.
+            <div>No active locations found.</div>
+            <div className="text-sm mt-2">Check console for debug information.</div>
           </div>
         )}
       </div>
 
+      
       <div className="mt-10 p-6 rounded-lg bg-green-50 border border-green-200 flex items-center justify-center gap-6">
         <img
           src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExNTNxeDg0Y3h3NGRtb2gxZHkybWlyYmE5a3cyc2J4ZmY3bG5jdzhmNiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/RGKIlvqNPUnrXn41cK/giphy.gif"
