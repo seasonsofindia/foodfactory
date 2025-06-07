@@ -39,8 +39,8 @@ const Index = () => {
     const { data, error } = await supabase
       .from("locations")
       .select("*")
-      .eq("id", DEFAULT_LOCATION_ID)
-      .single();
+      .eq('active_location', true) 
+      .order('sort_order', { ascending: true });
     if (!error && data) {
       setLocation(data);
     }
@@ -49,17 +49,17 @@ const Index = () => {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">
-        Our Kitchens @ {location ? location.display_name : "Loading..."}
+        Our Kitchens @ {location? location.display_name: "Loading..."}
       </h1>
       <div className="flex items-center">
         <MapPin className="mr-2 h-5 w-5 text-green-600" />
         <a 
-          href={location ? `https://maps.google.com/?q=${encodeURIComponent(location.address)}` : "#"}
+          href={location? `https://maps.google.com/?q=${encodeURIComponent(location.address)}` : "#"}
           target="_blank" 
           rel="noopener noreferrer"
           className="text-xl font-bold hover:text-green-600 transition-colors"
         >
-          {location ? location.address : "Loading..."}
+          {location? location.address: "Loading..."}
         </a>
       </div>
       <div className="flex items-center">
