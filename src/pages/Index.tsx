@@ -39,8 +39,8 @@ const Index = () => {
     const { data, error } = await supabase
       .from("locations")
       .select("*")
-      .eq('active_location', true) 
-      .order('sort_order', { ascending: true });
+      .eq("id", DEFAULT_LOCATION_ID)
+      .single();
     if (!error && data) {
       setLocation(data);
     }
