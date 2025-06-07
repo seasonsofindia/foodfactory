@@ -1,14 +1,19 @@
 
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import LocationCard from "@/components/LocationCard";
 import DatabaseDebug from "@/components/DatabaseDebug";
+import { Button } from "@/components/ui/button";
+
+const DEFAULT_LOCATION_ID = '331c7d5d-ec2b-4289-81f8-dccb74d39571';
 
 const Locations = () => {
   const [locations, setLocations] = useState<Tables<'locations'>[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchLocations();
@@ -36,6 +41,13 @@ const Locations = () => {
         return;
       }
 
+      // If no active locations found, fallback to default location behavior
+      if (!data || data.length === 0) {
+        console.log("No active locations found, redirecting to default location...");
+        navigate("/default-location");
+        return;
+      }
+
       setLocations(data || []);
     } catch (error) {
       console.error("Error fetching locations:", error);
@@ -53,12 +65,20 @@ const Locations = () => {
     return (
       <div className="text-center p-8">
         <div className="text-red-600 mb-4">Error loading locations: {error}</div>
-        <button 
-          onClick={fetchLocations}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Retry
-        </button>
+        <div className="space-x-4">
+          <button 
+            onClick={fetchLocations}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            Retry
+          </button>
+          <Button 
+            onClick={() => navigate("/default-location")}
+            variant="outline"
+          >
+            Go to Default Location
+          </Button>
+        </div>
       </div>
     );
   }
@@ -77,7 +97,7 @@ const Locations = () => {
         ) : (
           <div className="col-span-full text-center py-8 text-gray-500">
             <div>No active locations found.</div>
-            <div className="text-sm mt-2">Check console for debug information.</div>
+            <div className="text-sm mt-2">Redirecting to default location...</div>
           </div>
         )}
       </div>
