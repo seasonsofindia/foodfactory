@@ -16,7 +16,6 @@ const LocationKitchens = () => {
     ordering_links: Tables<'ordering_links'>[];
   })[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -29,9 +28,6 @@ const LocationKitchens = () => {
 
     try {
       setLoading(true);
-      setError(null);
-      
-      console.log("Fetching location and kitchens for ID:", id);
       
       // Fetch location details
       const { data: locationData, error: locationError } = await supabase
@@ -40,15 +36,7 @@ const LocationKitchens = () => {
         .eq("id", id)
         .single();
 
-      console.log("Location data:", locationData);
-      console.log("Location error:", locationError);
-
-      if (locationError) {
-        console.error("Error fetching location:", locationError);
-        setError(`Error fetching location: ${locationError.message}`);
-        return;
-      }
-      
+      if (locationError) throw locationError;
       setLocation(locationData);
 
       // Fetch kitchens for this location
@@ -63,19 +51,10 @@ const LocationKitchens = () => {
         .eq('active_kitchen', true)
         .order('sort_order', { ascending: true });
 
-      console.log("Kitchens data for location:", kitchensData);
-      console.log("Kitchens error:", kitchensError);
-
-      if (kitchensError) {
-        console.error("Error fetching kitchens:", kitchensError);
-        setError(`Error fetching kitchens: ${kitchensError.message}`);
-        return;
-      }
-      
+      if (kitchensError) throw kitchensError;
       setKitchens(kitchensData || []);
     } catch (error) {
-      console.error("Unexpected error:", error);
-      setError(error instanceof Error ? error.message : "Unknown error occurred");
+      console.error("Error fetching location and kitchens:", error);
     } finally {
       setLoading(false);
     }
@@ -83,20 +62,6 @@ const LocationKitchens = () => {
 
   if (loading) {
     return <div className="text-center p-8">Loading...</div>;
-  }
-
-  if (error) {
-    return (
-      <div className="text-center p-8">
-        <div className="text-red-600 mb-4">{error}</div>
-        <button 
-          onClick={fetchLocationAndKitchens}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Retry
-        </button>
-      </div>
-    );
   }
 
   if (!location) {
@@ -144,18 +109,17 @@ const LocationKitchens = () => {
         </div>
       )}
 
-      {kitchens.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {kitchens.map((kitchen) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {kitchens.length > 0 ? (
+          kitchens.map((kitchen) => (
             <KitchenCard key={kitchen.id} kitchen={kitchen} />
-          ))}
-        </div>
-      ) : (
-        <div className="col-span-full text-center py-8 text-gray-500">
-          <div>No active kitchens found for this location.</div>
-          <div className="text-sm mt-2">Check console for debug information.</div>
-        </div>
-      )}
+          ))
+        ) : (
+          <div className="col-span-full text-center py-8 text-gray-500">
+            No active kitchens found for this location.
+          </div>
+        )}
+      </div>
     </div>
   );
 };

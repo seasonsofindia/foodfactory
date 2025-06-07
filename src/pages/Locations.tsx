@@ -1,9 +1,7 @@
-
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import LocationCard from "@/components/LocationCard";
-import DatabaseDebug from "@/components/DatabaseDebug";
 
 const Locations = () => {
   const [locations, setLocations] = useState<Tables<'locations'>[]>([]);
@@ -20,7 +18,16 @@ const Locations = () => {
       setError(null);
       console.log("Fetching locations...");
       
-      // Get only active locations
+      // First try to get all locations to debug
+      const { data: allData, error: allError } = await supabase
+        .from("locations")
+        .select("*")
+        .order('sort_order', { ascending: true });
+
+      console.log("All locations:", allData);
+      console.log("All locations error:", allError);
+
+      // Then get only active locations
       const { data, error } = await supabase
         .from("locations")
         .select("*")
@@ -36,7 +43,11 @@ const Locations = () => {
         return;
       }
 
-      setLocations(data || []);
+      if (data) {
+        setLocations(data);
+      } else {
+        console.log("No data returned from query");
+      }
     } catch (error) {
       console.error("Error fetching locations:", error);
       setError(error instanceof Error ? error.message : "Unknown error occurred");
@@ -67,8 +78,6 @@ const Locations = () => {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Our Locations</h1>
       
-      <DatabaseDebug />
-      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {locations.length > 0 ? (
           locations.map((location) => (
@@ -82,6 +91,7 @@ const Locations = () => {
         )}
       </div>
 
+      
       <div className="mt-10 p-6 rounded-lg bg-green-50 border border-green-200 flex items-center justify-center gap-6">
         <img
           src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExNTNxeDg0Y3h3NGRtb2gxZHkybWlyYmE5a3cyc2J4ZmY3bG5jdzhmNiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/RGKIlvqNPUnrXn41cK/giphy.gif"
