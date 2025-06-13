@@ -40,7 +40,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                   <NavigationMenuLink href="/default-location" className="text-white font-medium hover:text-green-200">
-                    Default Kitchen
+                  ®️
                   </NavigationMenuLink>
                 </NavigationMenuItem>
                 {!isMainPage && (
