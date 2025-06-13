@@ -1,4 +1,6 @@
+
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
 import LocationCard from "@/components/LocationCard";
@@ -7,6 +9,7 @@ const Locations = () => {
   const [locations, setLocations] = useState<Tables<'locations'>[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchLocations();
@@ -18,16 +21,6 @@ const Locations = () => {
       setError(null);
       console.log("Fetching locations...");
       
-      // First try to get all locations to debug
-      const { data: allData, error: allError } = await supabase
-        .from("locations")
-        .select("*")
-        .order('sort_order', { ascending: true });
-
-      console.log("All locations:", allData);
-      console.log("All locations error:", allError);
-
-      // Then get only active locations
       const { data, error } = await supabase
         .from("locations")
         .select("*")
@@ -43,10 +36,12 @@ const Locations = () => {
         return;
       }
 
-      if (data) {
+      if (data && data.length > 0) {
         setLocations(data);
       } else {
-        console.log("No data returned from query");
+        console.log("No active locations found, redirecting to default location");
+        // If no active locations found, redirect to default location page
+        navigate("/default-location", { replace: true });
       }
     } catch (error) {
       console.error("Error fetching locations:", error);
@@ -79,19 +74,11 @@ const Locations = () => {
       <h1 className="text-2xl font-bold">Our Locations</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {locations.length > 0 ? (
-          locations.map((location) => (
-            <LocationCard key={location.id} location={location} />
-          ))
-        ) : (
-          <div className="col-span-full text-center py-8 text-gray-500">
-            <div>No active locations found.</div>
-            <div className="text-sm mt-2">Check console for debug information.</div>
-          </div>
-        )}
+        {locations.map((location) => (
+          <LocationCard key={location.id} location={location} />
+        ))}
       </div>
 
-      
       <div className="mt-10 p-6 rounded-lg bg-green-50 border border-green-200 flex items-center justify-center gap-6">
         <img
           src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExNTNxeDg0Y3h3NGRtb2gxZHkybWlyYmE5a3cyc2J4ZmY3bG5jdzhmNiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/RGKIlvqNPUnrXn41cK/giphy.gif"

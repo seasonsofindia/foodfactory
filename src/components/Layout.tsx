@@ -13,8 +13,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   // Check if we're on a kitchen detail page by looking at the URL pattern
   const isKitchenDetailPage = location.pathname.startsWith('/kitchen/');
-  // Check if we're on the main page
-  const isMainPage = location.pathname === '/';
+  // Check if we're on the main page (now locations)
+  const isMainPage = location.pathname === '/' || location.pathname === '/locations';
 
   useEffect(() => {
     setUser(getCurrentUser());
@@ -39,8 +39,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   </NavigationMenuLink>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                  <NavigationMenuLink href="/locations" className="text-white font-medium hover:text-green-200">
-                    Locations
+                  <NavigationMenuLink href="/default-location" className="text-white font-medium hover:text-green-200">
+                    Default Kitchen
                   </NavigationMenuLink>
                 </NavigationMenuItem>
                 {!isMainPage && (
